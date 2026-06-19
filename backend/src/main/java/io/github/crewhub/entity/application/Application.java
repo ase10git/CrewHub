@@ -1,6 +1,7 @@
-package io.github.crewhub.entity.gathering;
+package io.github.crewhub.entity.application;
 
 import io.github.crewhub.entity.common.BaseEntity;
+import io.github.crewhub.entity.gathering.Gathering;
 import io.github.crewhub.entity.user.User;
 import io.github.crewhub.enums.gathering.ApplicationStatus;
 import jakarta.persistence.*;
