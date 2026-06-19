@@ -1,0 +1,45 @@
+package io.github.crewhub.entity.document;
+
+import io.github.crewhub.entity.common.BaseEntity;
+import io.github.crewhub.entity.gathering.Gathering;
+import io.github.crewhub.entity.user.User;
+import jakarta.persistence.*;
+import lombok.*;
+
+/**
+ * 문서 Entity
+ */
+@Entity
+@Table(name = "documents")
+@Getter
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+public class Document extends BaseEntity {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Integer id;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", nullable = false)
+    private User writer;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "gathering_id", nullable = false)
+    private Gathering gathering;
+
+    @Column(name = "title", nullable = false, length = 255)
+    private String title;
+
+    @Column(
+            name = "content",
+            nullable = false,
+            columnDefinition = "TEXT"
+    )
+    private String content;
+
+    @Column(name = "views", nullable = false)
+    private Integer views = 0;
+
+    @Column(name = "is_deleted", nullable = false)
+    private Boolean isDeleted = false;
+}
