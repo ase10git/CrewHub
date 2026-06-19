@@ -1,4 +1,4 @@
-package io.github.crewhub.enums.gathering;
+package io.github.crewhub.enums.application;
 
 /**
  * 지원 상태
