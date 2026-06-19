@@ -16,6 +16,9 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+/**
+ * 인증 인가 서비스
+ */
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
