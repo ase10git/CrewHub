@@ -20,7 +20,7 @@ public class Document extends BaseEntity {
     private Integer id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id", nullable = false)
+    @JoinColumn(name = "writer_id", nullable = false)
     private User writer;
 
     @ManyToOne(fetch = FetchType.LAZY)
