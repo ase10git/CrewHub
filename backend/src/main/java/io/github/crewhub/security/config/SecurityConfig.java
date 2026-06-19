@@ -1,5 +1,6 @@
 package io.github.crewhub.security.config;
 
+import io.github.crewhub.security.jwt.JwtAuthenticationFilter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -28,7 +29,7 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(
             HttpSecurity http
-    ) throws Exception {
+    ) {
 
         http
                 .csrf(csrf -> csrf.disable())
@@ -48,7 +49,7 @@ public class SecurityConfig {
                                 "/swagger-ui/**",
                                 "/swagger-ui.html",
 
-                                "/v3/api-docs/**",
+                                "/v1/api-docs/**",
 
                                 "/api/gatherings",
                                 "/api/gatherings/*"
