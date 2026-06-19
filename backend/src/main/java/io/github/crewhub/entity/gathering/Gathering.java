@@ -1,0 +1,54 @@
+package io.github.crewhub.entity.gathering;
+
+import io.github.crewhub.entity.common.BaseEntity;
+import io.github.crewhub.entity.user.User;
+import jakarta.persistence.*;
+import lombok.AccessLevel;
+import lombok.*;
+
+/**
+ * 모임 Entity
+ */
+@Entity
+@Table(name = "gatherings")
+@Getter
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+public class Gathering extends BaseEntity {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Integer id;
+
+    @Column(
+            name = "group_name",
+            nullable = false,
+            length = 100,
+            unique = true
+    )
+    private String groupName;
+
+    @Column(
+            name = "description",
+            nullable = false,
+            columnDefinition = "TEXT"
+    )
+    private String description;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(
+            name = "category_id",
+            nullable = false,
+            foreignKey = @ForeignKey(name = "fk_gathering_category")
+    )
+    private GatheringCategory category;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(
+            name = "manager_id",
+            nullable = false,
+            foreignKey = @ForeignKey(name = "fk_gathering_manager")
+    )
+    private User manager;
+
+    @Column(name = "is_deleted", nullable = false)
+    private Boolean isDeleted = false;
+}
