@@ -1,6 +1,7 @@
 package io.github.crewhub.security.jwt;
 
 import io.github.crewhub.security.details.CustomUserDetailsService;
+import io.jsonwebtoken.JwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -47,8 +48,8 @@ public class JwtAuthenticationFilter  extends OncePerRequestFilter {
             return;
         }
 
-        String jwt = authHeader.substring(7);
         try {
+            String jwt = authHeader.substring(7);
             String userId = jwtProvider.extractUserId(jwt);
 
             if (userId != null
@@ -82,8 +83,9 @@ public class JwtAuthenticationFilter  extends OncePerRequestFilter {
                     SecurityContextHolder.setContext(context);
                 }
             }
-        } catch (Exception e) {
-            filterChain.doFilter(request, response);
+        } catch (JwtException e) {
+            SecurityContextHolder.clearContext();
         }
+        filterChain.doFilter(request, response);
     }
 }
