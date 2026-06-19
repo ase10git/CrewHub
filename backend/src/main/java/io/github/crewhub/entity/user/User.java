@@ -19,6 +19,8 @@ import lombok.*;
 )
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@AllArgsConstructor(access = AccessLevel.PRIVATE)
+@Builder
 public class User extends BaseEntity {
 
     @Id
@@ -43,4 +45,14 @@ public class User extends BaseEntity {
 
     @Column(name = "profile_image", length = 255)
     private String profileImage;
+
+    public void updateProfile(
+            String username,
+            String description,
+            String profileImage
+    ) {
+        this.username = username;
+        this.description = description;
+        this.profileImage = profileImage;
+    }
 }
