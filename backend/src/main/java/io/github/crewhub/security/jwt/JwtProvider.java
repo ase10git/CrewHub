@@ -33,6 +33,11 @@ public class JwtProvider {
         Map<String, Object> claims = new HashMap<>();
 
         claims.put(
+                "email",
+                userDetails.getEmail()
+        );
+
+        claims.put(
                 "username",
                 userDetails.getNickname()
         );

@@ -9,6 +9,6 @@ import lombok.Builder;
 public record SignUpResponse(
         Integer userId,
         String username,
-        String email
+        String accessToken
 ) {
 }
