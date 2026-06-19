@@ -25,11 +25,11 @@ public class AuthService {
     private final JwtProvider jwtProvider;
 
     public LoginResponse login(LoginRequest request) {
-        User user = userRepository.findByEmail(request.getEmail()).orElseThrow(
+        User user = userRepository.findByEmail(request.email()).orElseThrow(
                 () -> new BusinessException(ErrorCode.INVALID_LOGIN)
         );
 
-        validatePassword(request.getPassword(), user.getPassword());
+        validatePassword(request.password(), user.getPassword());
 
         String accessToken = jwtProvider.generateToken(new CustomUserDetails(user));
 
@@ -45,10 +45,10 @@ public class AuthService {
         validateDuplicateUser(request);
 
         User user = User.builder()
-                .username(request.getUsername())
-                .email(request.getEmail())
+                .username(request.username())
+                .email(request.email())
                 .password(passwordEncoder.encode(
-                        request.getPassword()
+                        request.password()
                 ))
                 .status(UserStatus.ACTIVE)
                 .build();
@@ -65,10 +65,10 @@ public class AuthService {
     }
 
     private void validateDuplicateUser(SignUpRequest request) {
-        if (userRepository.existsByEmail(request.getEmail())) {
+        if (userRepository.existsByEmail(request.email())) {
             throw new BusinessException(ErrorCode.DUPLICATE_EMAIL);
         }
-        if (userRepository.existsByUsername(request.getUsername())) {
+        if (userRepository.existsByUsername(request.username())) {
             throw new BusinessException(ErrorCode.DUPLICATE_USERNAME);
         }
     }
