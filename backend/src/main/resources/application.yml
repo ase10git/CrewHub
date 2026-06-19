@@ -1,0 +1,16 @@
+server:
+  error:
+    whitelabel:
+      enabled: false
+
+spring:
+  application:
+    name: CrewHub
+
+app:
+  name: ${APP_NAME:CrewHub}
+  version: ${APP_VERSION:0.0.0}
+
+logging:
+  level:
+    root: ${LOG_LEVEL:INFO}
