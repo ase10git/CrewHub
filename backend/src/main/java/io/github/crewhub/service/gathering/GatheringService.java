@@ -6,6 +6,7 @@ import io.github.crewhub.dto.gathering.response.CreateGatheringResponse;
 import io.github.crewhub.entity.gathering.Gathering;
 import io.github.crewhub.entity.gathering.GatheringCategory;
 import io.github.crewhub.entity.gathering.GatheringMember;
+import io.github.crewhub.entity.gathering.GatheringMemberId;
 import io.github.crewhub.entity.user.User;
 import io.github.crewhub.enums.common.ErrorCode;
 import io.github.crewhub.enums.gathering.MemberRole;
@@ -46,9 +47,9 @@ public class GatheringService {
                 .description(request.description())
                 .build();
 
-        registerManager(gathering, manager);
-
         Gathering savedGathering = gatheringRepository.save(gathering);
+
+        registerManager(savedGathering, manager);
 
         return CreateGatheringResponse.builder()
                 .gatheringId(savedGathering.getId())
@@ -73,6 +74,7 @@ public class GatheringService {
 
     private void registerManager(Gathering gathering, User manager) {
         GatheringMember member = GatheringMember.builder()
+                .id(new GatheringMemberId(gathering.getId(), manager.getId()))
                 .gathering(gathering)
                 .user(manager)
                 .role(MemberRole.MANAGER)
