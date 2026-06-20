@@ -19,12 +19,12 @@ public class Gathering extends BaseEntity {
     private Integer id;
 
     @Column(
-            name = "group_name",
+            name = "gathering_name",
             nullable = false,
             length = 100,
             unique = true
     )
-    private String groupName;
+    private String gatheringName;
 
     @Column(
             name = "description",
