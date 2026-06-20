@@ -13,6 +13,8 @@ import lombok.*;
 @Table(name = "gatherings")
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@AllArgsConstructor(access = AccessLevel.PRIVATE)
+@Builder
 public class Gathering extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -51,4 +53,12 @@ public class Gathering extends BaseEntity {
 
     @Column(name = "is_deleted", nullable = false)
     private Boolean isDeleted = false;
+
+    public void updateGathering(
+            String gatheringName,
+            String description
+    ) {
+        this.gatheringName = gatheringName;
+        this.description = description;
+    }
 }
