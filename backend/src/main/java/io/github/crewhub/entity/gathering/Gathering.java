@@ -62,4 +62,8 @@ public class Gathering extends BaseEntity {
         this.gatheringName = gatheringName;
         this.description = description;
     }
+
+    public void delete() {
+        this.isDeleted = true;
+    }
 }

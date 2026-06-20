@@ -2,9 +2,11 @@ package io.github.crewhub.service.gathering;
 
 import io.github.crewhub.common.exception.BusinessException;
 import io.github.crewhub.dto.gathering.request.CreateGatheringRequest;
+import io.github.crewhub.dto.gathering.request.UpdateGatheringRequest;
 import io.github.crewhub.dto.gathering.response.CreateGatheringResponse;
 import io.github.crewhub.dto.gathering.response.GatheringDetailResponse;
 import io.github.crewhub.dto.gathering.response.GatheringSummaryResponse;
+import io.github.crewhub.dto.gathering.response.UpdateGatheringResponse;
 import io.github.crewhub.entity.gathering.Gathering;
 import io.github.crewhub.entity.gathering.GatheringCategory;
 import io.github.crewhub.entity.gathering.GatheringMember;
@@ -144,5 +146,67 @@ public class GatheringService {
                 .build();
 
         memberRepository.save(member);
+    }
+
+    @Transactional
+    public UpdateGatheringResponse update(
+            Integer userId,
+            Integer gatheringId,
+            UpdateGatheringRequest request
+    ) {
+        Gathering gathering = findGathering(gatheringId);
+
+        validateManager(userId, gathering);
+
+        validateDuplicateName(request.gatheringName(), gatheringId);
+
+        gathering.updateGathering(request.gatheringName(), request.description());
+
+        return UpdateGatheringResponse.builder()
+                .gatheringId(gathering.getId())
+                .gatheringName(gathering.getGatheringName())
+                .description(gathering.getDescription())
+                .build();
+    }
+
+    private Gathering findGathering(Integer gatheringId) {
+        return gatheringRepository.findDetailById(gatheringId)
+                .orElseThrow(
+                        () -> new BusinessException(
+                                ErrorCode.GATHERING_NOT_FOUND
+                        )
+                );
+    }
+
+    private void validateDuplicateName(
+            String gatheringName,
+            Integer gatheringId
+    ) {
+        if (gatheringRepository
+                .existsByGatheringNameAndIdNot(gatheringName, gatheringId)) {
+            throw new BusinessException(
+                    ErrorCode.DUPLICATE_GATHERING_NAME
+            );
+        }
+    }
+
+    private void validateManager(Integer userId, Gathering gathering) {
+        if (!gathering.getManager()
+                .getId()
+                .equals(userId)) {
+
+            throw new BusinessException(
+                    ErrorCode.GATHERING_ACCESS_DENIED
+            );
+        }
+    }
+
+    @Transactional
+    public void delete(Integer userId, Integer gatheringId) {
+        Gathering gathering = findGathering(gatheringId);
+
+        validateManager(userId, gathering);
+
+        gathering.delete();
     }
 }
