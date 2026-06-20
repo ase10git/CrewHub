@@ -24,6 +24,7 @@ public enum ErrorCode {
 
     INVALID_TOKEN(HttpStatus.UNAUTHORIZED, "유효하지 않은 토큰입니다."),
 
+    GATHERING_ACCESS_DENIED(HttpStatus.FORBIDDEN, "모임 관리자만 가능합니다."),
 
     INTERNAL_SERVER_ERROR(
             HttpStatus.INTERNAL_SERVER_ERROR,
