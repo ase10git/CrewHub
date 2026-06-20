@@ -21,9 +21,7 @@ public interface GatheringRepository extends JpaRepository<Gathering, Integer> {
         join fetch g.manager
         where g.id = :gatheringId
     """)
-    Optional<Gathering> findDetailById(
-            @Param("gatheringId") Integer gatheringId
-    );
+    Optional<Gathering> findDetailById(@Param("gatheringId") Integer gatheringId);
     @Query("""
         select g
         from Gathering g
@@ -32,6 +30,15 @@ public interface GatheringRepository extends JpaRepository<Gathering, Integer> {
         where g.isDeleted = false
     """)
     List<Gathering> findAllActive();
+    @Query("""
+        select g
+        from Gathering g
+        join fetch g.manager
+        join fetch g.category
+        where g.id = :gatheringId
+        and g.isDeleted = false
+    """)
+    Optional<Gathering> findActiveById(@Param("gatheringId") Integer gatheringId);
     List<Gathering> findByGatheringNameContainingIgnoreCase(String keyword);
     List<Gathering> findByCategoryId(Integer categoryId);
     boolean existsByGatheringName(String gatheringName);
