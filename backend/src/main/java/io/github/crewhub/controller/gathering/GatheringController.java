@@ -2,9 +2,11 @@ package io.github.crewhub.controller.gathering;
 
 import io.github.crewhub.common.response.ApiResponse;
 import io.github.crewhub.dto.gathering.request.CreateGatheringRequest;
+import io.github.crewhub.dto.gathering.request.UpdateGatheringRequest;
 import io.github.crewhub.dto.gathering.response.CreateGatheringResponse;
 import io.github.crewhub.dto.gathering.response.GatheringDetailResponse;
 import io.github.crewhub.dto.gathering.response.GatheringSummaryResponse;
+import io.github.crewhub.dto.gathering.response.UpdateGatheringResponse;
 import io.github.crewhub.security.details.CustomUserDetails;
 import io.github.crewhub.service.gathering.GatheringService;
 import jakarta.validation.Valid;
@@ -63,5 +65,35 @@ public class GatheringController {
             @AuthenticationPrincipal CustomUserDetails userDetails
             ) {
         return ApiResponse.success(gatheringService.create(userDetails.getUserId(), request));
+    }
+
+    @PutMapping("/{gatheringId}")
+    public ApiResponse<UpdateGatheringResponse> update(
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            @PathVariable Integer gatheringId,
+            @Valid @RequestBody UpdateGatheringRequest request
+    ) {
+        return ApiResponse.success(
+                gatheringService.update(
+                        userDetails.getUserId(),
+                        gatheringId,
+                        request
+                )
+        );
+    }
+
+    @DeleteMapping("/{gatheringId}")
+    public ApiResponse<Void> delete(
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            @PathVariable Integer gatheringId
+    ) {
+        gatheringService.delete(
+                userDetails.getUserId(),
+                gatheringId
+        );
+
+        return ApiResponse.success(
+                "모임이 삭제되었습니다.", null
+        );
     }
 }
