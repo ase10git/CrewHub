@@ -3,6 +3,8 @@ package io.github.crewhub.service.gathering;
 import io.github.crewhub.common.exception.BusinessException;
 import io.github.crewhub.dto.gathering.request.CreateGatheringRequest;
 import io.github.crewhub.dto.gathering.response.CreateGatheringResponse;
+import io.github.crewhub.dto.gathering.response.GatheringDetailResponse;
+import io.github.crewhub.dto.gathering.response.GatheringSummaryResponse;
 import io.github.crewhub.entity.gathering.Gathering;
 import io.github.crewhub.entity.gathering.GatheringCategory;
 import io.github.crewhub.entity.gathering.GatheringMember;
@@ -18,6 +20,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+
 /**
  * 모임 서비스
  */
@@ -29,6 +33,65 @@ public class GatheringService {
     private final GatheringCategoryRepository categoryRepository;
     private final GatheringMemberRepository memberRepository;
     private final UserRepository userRepository;
+
+    public List<GatheringSummaryResponse> getGatherings() {
+
+        return gatheringRepository.findAllActive()
+                .stream()
+                .map(this::toSummaryResponse)
+                .toList();
+    }
+
+    public GatheringDetailResponse getGathering(Integer gatheringId) {
+        Gathering gathering =
+                gatheringRepository.findDetailById(gatheringId)
+                        .orElseThrow(
+                                () -> new BusinessException(
+                                        ErrorCode.GATHERING_NOT_FOUND
+                                )
+                        );
+
+        return GatheringDetailResponse.builder()
+                .gatheringId(gathering.getId())
+                .gatheringName(gathering.getGatheringName())
+                .description(gathering.getDescription())
+                .categoryLabel(gathering.getCategory().getLabel())
+                .managerId(gathering.getManager().getId())
+                .managerName(gathering.getManager().getUsername())
+                .build();
+    }
+
+    public List<GatheringSummaryResponse> searchByName(String keyword) {
+
+        return gatheringRepository
+                .findByGatheringNameContainingIgnoreCase(keyword)
+                .stream()
+                .map(this::toSummaryResponse)
+                .toList();
+    }
+
+    public List<GatheringSummaryResponse> searchByCategory(Integer categoryId) {
+
+        return gatheringRepository
+                .findByCategoryId(categoryId)
+                .stream()
+                .map(this::toSummaryResponse)
+                .toList();
+    }
+
+    private GatheringSummaryResponse toSummaryResponse(Gathering gathering) {
+
+        return GatheringSummaryResponse.builder()
+                .gatheringId(gathering.getId())
+                .gatheringName(gathering.getGatheringName())
+                .categoryLabel(
+                        gathering.getCategory().getLabel()
+                )
+                .managerName(
+                        gathering.getManager().getUsername()
+                )
+                .build();
+    }
 
     @Transactional
     public CreateGatheringResponse create(Integer userId, CreateGatheringRequest request) {
