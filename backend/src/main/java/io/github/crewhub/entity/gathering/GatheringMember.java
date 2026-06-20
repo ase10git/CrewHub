@@ -6,8 +6,6 @@ import io.github.crewhub.enums.gathering.MemberRole;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.time.LocalDateTime;
-
 /**
  * 모임 회원 Entity
  */
@@ -35,7 +33,4 @@ public class GatheringMember extends BaseEntity{
     @Enumerated(EnumType.STRING)
     @Column(name = "role", nullable = false, length = 20)
     private MemberRole role;
-
-    @Column(name = "joined_at", nullable = false)
-    private LocalDateTime joinedAt;
 }
