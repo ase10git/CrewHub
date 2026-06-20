@@ -10,11 +10,11 @@ import lombok.Builder;
  */
 @Builder
 public record CreateGatheringRequest(
-        @NotBlank @Size(min = 5, max = 100)
+        @NotBlank @Size(min = 3, max = 100)
         String gatheringName,
         @NotNull
         Integer categoryId,
-        @NotBlank @Size(min = 10, max = 500)
+        @NotBlank @Size(min = 5, max = 500)
         String description
 ) {
 }
