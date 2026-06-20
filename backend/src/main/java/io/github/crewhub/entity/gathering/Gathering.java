@@ -51,6 +51,7 @@ public class Gathering extends BaseEntity {
     )
     private User manager;
 
+    @Builder.Default
     @Column(name = "is_deleted", nullable = false)
     private Boolean isDeleted = false;
 
