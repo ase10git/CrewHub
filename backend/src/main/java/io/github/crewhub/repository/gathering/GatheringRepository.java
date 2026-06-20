@@ -9,6 +9,6 @@ import org.springframework.stereotype.Repository;
  */
 @Repository
 public interface GatheringRepository extends JpaRepository<Gathering, Integer> {
-    boolean existByGatheringName(String gatheringName);
-    boolean existByGatheringNameAndIdNot(String gatheringName, Integer gatheringId);
+    boolean existsByGatheringName(String gatheringName);
+    boolean existsByGatheringNameAndIdNot(String gatheringName, Integer gatheringId);
 }
