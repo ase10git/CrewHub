@@ -15,6 +15,8 @@ import java.time.LocalDateTime;
 @Table(name = "gathering_members")
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@AllArgsConstructor(access = AccessLevel.PRIVATE)
+@Builder
 public class GatheringMember extends BaseEntity{
 
     @EmbeddedId
