@@ -6,5 +6,6 @@ package io.github.crewhub.enums.application;
 public enum ApplicationStatus {
     PENDING,
     APPROVED,
-    REJECTED
+    REJECTED,
+    CANCELLED
 }
