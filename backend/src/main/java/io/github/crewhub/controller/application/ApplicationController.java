@@ -5,6 +5,7 @@ import io.github.crewhub.dto.application.request.CreateApplicationRequest;
 import io.github.crewhub.dto.application.response.CancelApplicationResponse;
 import io.github.crewhub.dto.application.response.CreateApplicationResponse;
 import io.github.crewhub.dto.application.response.MyApplicationResponse;
+import io.github.crewhub.dto.application.response.ProcessApplicationResponse;
 import io.github.crewhub.dto.common.PageResponse;
 import io.github.crewhub.security.details.CustomUserDetails;
 import io.github.crewhub.service.application.ApplicationService;
@@ -54,6 +55,16 @@ public class ApplicationController {
     ) {
         return ApiResponse.success(
                 applicationService.cancelApplication(userDetails.getUserId(), applicationId)
+        );
+    }
+
+    @PostMapping("/{applicationId}/approve")
+    public ApiResponse<ProcessApplicationResponse> approve(
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            @PathVariable Integer applicationId
+    ) {
+        return ApiResponse.success(
+                applicationService.approve(userDetails.getUserId(), applicationId)
         );
     }
 }
