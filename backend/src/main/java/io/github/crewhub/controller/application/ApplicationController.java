@@ -58,6 +58,16 @@ public class ApplicationController {
         );
     }
 
+    @PatchMapping("/{applicationId}/revert")
+    public ApiResponse<CancelApplicationResponse> revertApplication(
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            @PathVariable Integer applicationId
+    ) {
+        return ApiResponse.success(
+                applicationService.revertApplication(userDetails.getUserId(), applicationId)
+        );
+    }
+
     @PostMapping("/{applicationId}/approve")
     public ApiResponse<ProcessApplicationResponse> approve(
             @AuthenticationPrincipal CustomUserDetails userDetails,
