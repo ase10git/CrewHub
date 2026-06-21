@@ -1,13 +1,16 @@
 package io.github.crewhub.controller.gathering;
 
 import io.github.crewhub.common.response.ApiResponse;
+import io.github.crewhub.dto.application.response.GatheringApplicationResponse;
 import io.github.crewhub.dto.gathering.request.CreateGatheringRequest;
 import io.github.crewhub.dto.gathering.request.UpdateGatheringRequest;
 import io.github.crewhub.dto.gathering.response.CreateGatheringResponse;
 import io.github.crewhub.dto.gathering.response.GatheringDetailResponse;
 import io.github.crewhub.dto.gathering.response.GatheringSummaryResponse;
 import io.github.crewhub.dto.gathering.response.UpdateGatheringResponse;
+import io.github.crewhub.enums.application.ApplicationStatus;
 import io.github.crewhub.security.details.CustomUserDetails;
+import io.github.crewhub.service.application.ApplicationService;
 import io.github.crewhub.service.gathering.GatheringService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -24,6 +27,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class GatheringController {
     private final GatheringService gatheringService;
+    private final ApplicationService applicationService;
 
     @GetMapping
     public ApiResponse<List<GatheringSummaryResponse>> getGatherings() {
@@ -94,6 +98,22 @@ public class GatheringController {
 
         return ApiResponse.success(
                 "모임이 삭제되었습니다.", null
+        );
+    }
+
+    @GetMapping("/application/{gatheringId}")
+    public ApiResponse<List<GatheringApplicationResponse>> getGatheringApplications(
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            @PathVariable Integer gatheringId,
+            @RequestParam(required = false) ApplicationStatus status
+    ) {
+
+        return ApiResponse.success(
+                applicationService.getGatheringApplications(
+                        userDetails.getUserId(),
+                        gatheringId,
+                        status
+                )
         );
     }
 }
