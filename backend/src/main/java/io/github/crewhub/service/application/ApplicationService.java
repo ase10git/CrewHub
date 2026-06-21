@@ -23,8 +23,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
-
 /**
  * 지원서 서비스
  */
@@ -253,5 +251,24 @@ public class ApplicationService {
                         .build();
 
         memberRepository.save(member);
+    }
+
+    @Transactional
+    public ProcessApplicationResponse reject(Integer managerId, Integer applicationId) {
+        Application application = getApplication(applicationId);
+
+        validateManager(managerId, application.getGathering());
+
+        validatePending(application);
+
+        application.changeStatus(ApplicationStatus.REJECTED);
+
+        return ProcessApplicationResponse.builder()
+                .applicationId(application.getId())
+                .gatheringId(application.getGathering().getId())
+                .userId(application.getUser().getId())
+                .status(application.getStatus())
+                .updatedAt(application.getUpdatedAt())
+                .build();
     }
 }
