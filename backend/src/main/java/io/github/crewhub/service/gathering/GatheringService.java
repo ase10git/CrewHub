@@ -195,9 +195,7 @@ public class GatheringService {
                 .getId()
                 .equals(userId)) {
 
-            throw new BusinessException(
-                    ErrorCode.GATHERING_ACCESS_DENIED
-            );
+            throw new BusinessException(ErrorCode.GATHERING_MANGER_ONLY);
         }
     }
 
