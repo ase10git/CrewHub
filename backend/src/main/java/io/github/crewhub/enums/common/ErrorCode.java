@@ -10,7 +10,6 @@ import org.springframework.http.HttpStatus;
 public enum ErrorCode {
     INVALID_LOGIN(HttpStatus.UNAUTHORIZED, "이메일 또는 비밀번호가 올바르지 않습니다."),
     USER_NOT_FOUND(HttpStatus.NOT_FOUND, "사용자를 찾을 수 없습니다."),
-    GROUP_NOT_FOUND(HttpStatus.NOT_FOUND, "모임을 찾을 수 없습니다."),
     DOCUMENT_NOT_FOUND(HttpStatus.NOT_FOUND, "문서를 찾을 수 없습니다."),
     CATEGORY_NOT_FOUND(HttpStatus.NOT_FOUND, "카테고리를 찾을 수 없습니다."),
     GATHERING_NOT_FOUND(HttpStatus.NOT_FOUND, "모임을 찾을 수 없습니다."),
@@ -19,6 +18,7 @@ public enum ErrorCode {
     DUPLICATE_USERNAME(HttpStatus.CONFLICT, "이미 사용중인 사용자명입니다."),
     DUPLICATE_GATHERING_NAME(HttpStatus.CONFLICT, "이미 사용중인 모임 이름입니다."),
     DUPLICATE_GATHERING_MEMBER(HttpStatus.CONFLICT, "이미 가입한 모임입니다."),
+    DUPLICATE_APPLICATION(HttpStatus.CONFLICT, "이미 지원한 모임입니다."),
 
     ACCESS_DENIED(HttpStatus.FORBIDDEN, "접근 권한이 없습니다."),
 
