@@ -16,6 +16,17 @@ import java.util.Optional;
 public interface ApplicationRepository extends JpaRepository<Application, Integer> {
     boolean existsByUserIdAndGatheringId(Integer userId, Integer gatheringId);
     Optional<Application> findByIdAndUserId(Integer applicationId, Integer userId);
+    @Query("""
+        select a
+        from Application a
+        join fetch a.user
+        join fetch a.gathering g
+        join fetch g.manager
+        where a.id = :applicationId
+    """)
+    Optional<Application> findForProcess(
+            @Param("applicationId") Integer applicationId
+    );
     @Query(
     value = """
         select a
