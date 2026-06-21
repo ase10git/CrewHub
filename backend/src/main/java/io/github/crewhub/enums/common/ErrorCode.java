@@ -24,6 +24,7 @@ public enum ErrorCode {
     DUPLICATE_APPLICATION(HttpStatus.CONFLICT, "이미 지원한 모임입니다."),
 
     APPLICATION_ALREADY_PROCESSED(HttpStatus.BAD_REQUEST, "이미 처리된 지원서입니다."),
+    APPLICATION_NOT_CANCELLED(HttpStatus.BAD_REQUEST, "취소된 지원서만 복구할 수 있습니다."),
 
     ACCESS_DENIED(HttpStatus.FORBIDDEN, "접근 권한이 없습니다."),
     GATHERING_MANGER_ONLY(HttpStatus.FORBIDDEN, "모임 관리자만 가능합니다."),
