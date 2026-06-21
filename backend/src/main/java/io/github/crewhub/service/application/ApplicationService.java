@@ -2,10 +2,7 @@ package io.github.crewhub.service.application;
 
 import io.github.crewhub.common.exception.BusinessException;
 import io.github.crewhub.dto.application.request.CreateApplicationRequest;
-import io.github.crewhub.dto.application.response.CancelApplicationResponse;
-import io.github.crewhub.dto.application.response.CreateApplicationResponse;
-import io.github.crewhub.dto.application.response.GatheringApplicationResponse;
-import io.github.crewhub.dto.application.response.MyApplicationResponse;
+import io.github.crewhub.dto.application.response.*;
 import io.github.crewhub.dto.common.PageResponse;
 import io.github.crewhub.entity.application.Application;
 import io.github.crewhub.entity.gathering.Gathering;
@@ -132,10 +129,10 @@ public class ApplicationService {
             int page,
             int size
     ) {
-        User user = getUser(userId);
+        getUser(userId);
         Gathering gathering = getGathering(gatheringId);
 
-        validateManager(user, gathering);
+        validateManager(userId, gathering);
 
         Pageable pageable =
                 PageRequest.of(page, size);
@@ -164,10 +161,10 @@ public class ApplicationService {
         );
     }
 
-    private void validateManager(User user, Gathering gathering) {
+    private void validateManager(Integer userId, Gathering gathering) {
         if (!gathering.getManager()
                 .getId()
-                .equals(user.getId())) {
+                .equals(userId)) {
 
             throw new BusinessException(ErrorCode.GATHERING_MANGER_ONLY);
         }
@@ -196,4 +193,5 @@ public class ApplicationService {
             throw new BusinessException(ErrorCode.APPLICATION_ALREADY_PROCESSED);
         }
     }
+
 }
