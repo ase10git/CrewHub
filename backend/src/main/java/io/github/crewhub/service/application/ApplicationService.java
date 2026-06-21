@@ -3,6 +3,7 @@ package io.github.crewhub.service.application;
 import io.github.crewhub.common.exception.BusinessException;
 import io.github.crewhub.dto.application.request.CreateApplicationRequest;
 import io.github.crewhub.dto.application.response.CreateApplicationResponse;
+import io.github.crewhub.dto.application.response.MyApplicationResponse;
 import io.github.crewhub.entity.application.Application;
 import io.github.crewhub.entity.gathering.Gathering;
 import io.github.crewhub.entity.gathering.GatheringMemberId;
@@ -16,6 +17,8 @@ import io.github.crewhub.repository.user.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
 
 /**
  * 지원서 서비스
@@ -84,4 +87,54 @@ public class ApplicationService {
         }
     }
 
+    public List<MyApplicationResponse> getMyApplications(Integer userId) {
+        User user = getUser(userId);
+
+        return applicationRepository.findMyApplications(user.getId())
+                .stream()
+                .map(application -> MyApplicationResponse.builder()
+                        .applicationId(application.getId())
+                        .gatheringId(application.getGathering().getId())
+                        .gatheringName(application.getGathering().getGatheringName())
+                        .status(application.getStatus())
+                        .createdAt(application.getCreatedAt())
+                        .updatedAt(application.getUpdatedAt())
+                        .build())
+                .toList();
+    }
+/*
+    public List<GatheringApplicationResponse> getGatheringApplication(
+            Integer userId,
+            Integer gatheringId,
+            ApplicationStatus status
+    ) {
+        User user = getUser(userId);
+        Gathering gathering = getGathering(gatheringId);
+
+        validateManager(user, gathering);
+
+        return applicationRepository.findGatheringApplications(
+                    gathering.getId(), status
+                )
+                .stream()
+                .map(application -> GatheringApplicationResponse.builder()
+                        .applicationId(application.getId())
+                        .userId(application.getUser().getId())
+                        .username(application.getUser().getUsername())
+                        .status(application.getStatus())
+                        .createdAt(application.getCreatedAt())
+                        .updatedAt(application.getUpdatedAt())
+                        .build())
+                .toList();
+    }
+
+    private void validateManager(User user, Gathering gathering) {
+        if (!gathering.getManager()
+                .getId()
+                .equals(user.getId())) {
+
+            throw new BusinessException(ErrorCode.GATHERING_MANGER_ONLY);
+        }
+    }
+    */
 }

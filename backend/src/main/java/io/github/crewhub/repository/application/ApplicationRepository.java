@@ -13,11 +13,6 @@ import java.util.List;
  */
 public interface ApplicationRepository extends JpaRepository<Application, Integer> {
     boolean existsByUserIdAndGatheringId(Integer userId, Integer gatheringId);
-    boolean existsByUserIdAndGatheringIdAndStatus(
-            Integer userId,
-            Integer gatheringId,
-            ApplicationStatus status
-    );
     @Query("""
         select a
         from Application a
@@ -33,7 +28,11 @@ public interface ApplicationRepository extends JpaRepository<Application, Intege
         join fetch a.user
         join fetch a.gathering
         where a.gathering.id = :gatheringId
+        and a.status = :status
         order by a.createdAt desc
     """)
-    List<Application> findGatheringApplications(@Param("gatheringId") Integer gatheringId);
+    List<Application> findGatheringApplications(
+            @Param("gatheringId") Integer gatheringId,
+            @Param("status") ApplicationStatus status
+    );
 }
