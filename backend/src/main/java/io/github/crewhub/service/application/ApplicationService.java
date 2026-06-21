@@ -3,6 +3,7 @@ package io.github.crewhub.service.application;
 import io.github.crewhub.common.exception.BusinessException;
 import io.github.crewhub.dto.application.request.CreateApplicationRequest;
 import io.github.crewhub.dto.application.response.CreateApplicationResponse;
+import io.github.crewhub.dto.application.response.GatheringApplicationResponse;
 import io.github.crewhub.dto.application.response.MyApplicationResponse;
 import io.github.crewhub.entity.application.Application;
 import io.github.crewhub.entity.gathering.Gathering;
@@ -102,8 +103,8 @@ public class ApplicationService {
                         .build())
                 .toList();
     }
-/*
-    public List<GatheringApplicationResponse> getGatheringApplication(
+
+    public List<GatheringApplicationResponse> getGatheringApplications(
             Integer userId,
             Integer gatheringId,
             ApplicationStatus status
@@ -136,5 +137,4 @@ public class ApplicationService {
             throw new BusinessException(ErrorCode.GATHERING_MANGER_ONLY);
         }
     }
-    */
 }

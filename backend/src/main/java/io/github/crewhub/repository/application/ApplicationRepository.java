@@ -28,7 +28,7 @@ public interface ApplicationRepository extends JpaRepository<Application, Intege
         join fetch a.user
         join fetch a.gathering
         where a.gathering.id = :gatheringId
-        and a.status = :status
+        and (:status is NULL or a.status = :status)
         order by a.createdAt desc
     """)
     List<Application> findGatheringApplications(
