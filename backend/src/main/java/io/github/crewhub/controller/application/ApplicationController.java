@@ -4,14 +4,13 @@ import io.github.crewhub.common.response.ApiResponse;
 import io.github.crewhub.dto.application.request.CreateApplicationRequest;
 import io.github.crewhub.dto.application.response.CreateApplicationResponse;
 import io.github.crewhub.dto.application.response.MyApplicationResponse;
+import io.github.crewhub.dto.common.PageResponse;
 import io.github.crewhub.security.details.CustomUserDetails;
 import io.github.crewhub.service.application.ApplicationService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 /**
  * 지원서 컨트롤러
@@ -33,11 +32,17 @@ public class ApplicationController {
     }
 
     @GetMapping("/my")
-    public ApiResponse<List<MyApplicationResponse>> getMyApplications(
-            @AuthenticationPrincipal CustomUserDetails userDetails
+    public ApiResponse<PageResponse<MyApplicationResponse>> getMyApplications(
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "5") int size
     ) {
         return ApiResponse.success(
-                applicationService.getMyApplications(userDetails.getUserId())
+                applicationService.getMyApplications(
+                        userDetails.getUserId(),
+                        page,
+                        size
+                )
         );
     }
 

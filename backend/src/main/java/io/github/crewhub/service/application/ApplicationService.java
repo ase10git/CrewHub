@@ -5,6 +5,7 @@ import io.github.crewhub.dto.application.request.CreateApplicationRequest;
 import io.github.crewhub.dto.application.response.CreateApplicationResponse;
 import io.github.crewhub.dto.application.response.GatheringApplicationResponse;
 import io.github.crewhub.dto.application.response.MyApplicationResponse;
+import io.github.crewhub.dto.common.PageResponse;
 import io.github.crewhub.entity.application.Application;
 import io.github.crewhub.entity.gathering.Gathering;
 import io.github.crewhub.entity.gathering.GatheringMemberId;
@@ -16,6 +17,9 @@ import io.github.crewhub.repository.gathering.GatheringMemberRepository;
 import io.github.crewhub.repository.gathering.GatheringRepository;
 import io.github.crewhub.repository.user.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -88,20 +92,38 @@ public class ApplicationService {
         }
     }
 
-    public List<MyApplicationResponse> getMyApplications(Integer userId) {
-        User user = getUser(userId);
+    public PageResponse<MyApplicationResponse> getMyApplications(
+            Integer userId,
+            int page,
+            int size
+    ) {
+        getUser(userId);
 
-        return applicationRepository.findMyApplications(user.getId())
-                .stream()
-                .map(application -> MyApplicationResponse.builder()
-                        .applicationId(application.getId())
-                        .gatheringId(application.getGathering().getId())
-                        .gatheringName(application.getGathering().getGatheringName())
-                        .status(application.getStatus())
-                        .createdAt(application.getCreatedAt())
-                        .updatedAt(application.getUpdatedAt())
-                        .build())
-                .toList();
+        Pageable pageable =
+                PageRequest.of(page, size);
+
+        Page<Application> applications =
+                applicationRepository.findMyApplications(userId, pageable);
+
+        return new PageResponse<>(
+                applications.stream()
+                        .map(application
+                                -> MyApplicationResponse.builder()
+                                        .applicationId(application.getId())
+                                        .gatheringId(application.getGathering().getId())
+                                        .gatheringName(application.getGathering().getGatheringName())
+                                        .status(application.getStatus())
+                                        .createdAt(application.getCreatedAt())
+                                        .updatedAt(application.getUpdatedAt())
+                                        .build()
+                        )
+                        .toList(),
+                applications.getNumber(),
+                applications.getSize(),
+                applications.getTotalElements(),
+                applications.getTotalPages(),
+                applications.hasNext()
+        );
     }
 
     public List<GatheringApplicationResponse> getGatheringApplications(
