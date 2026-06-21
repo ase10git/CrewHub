@@ -2,6 +2,7 @@ package io.github.crewhub.service.application;
 
 import io.github.crewhub.common.exception.BusinessException;
 import io.github.crewhub.dto.application.request.CreateApplicationRequest;
+import io.github.crewhub.dto.application.response.CancelApplicationResponse;
 import io.github.crewhub.dto.application.response.CreateApplicationResponse;
 import io.github.crewhub.dto.application.response.GatheringApplicationResponse;
 import io.github.crewhub.dto.application.response.MyApplicationResponse;
@@ -169,6 +170,29 @@ public class ApplicationService {
                 .equals(user.getId())) {
 
             throw new BusinessException(ErrorCode.GATHERING_MANGER_ONLY);
+        }
+    }
+
+    public CancelApplicationResponse cancelApplication(Integer userId, Integer applicationId) {
+        Application application = applicationRepository.findByIdAndUserId(applicationId, userId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.APPLICATION_NOT_FOUND));
+
+        validateCancelable(application);
+
+        application.changeStatus(ApplicationStatus.CANCELLED);
+
+        return CancelApplicationResponse.builder()
+                .applicationId(application.getId())
+                .gatheringId(application.getGathering().getId())
+                .status(application.getStatus())
+                .updatedAt(application.getUpdatedAt())
+                .build();
+    }
+
+    private void validateCancelable(Application application) {
+        if (application.getStatus()
+                != ApplicationStatus.PENDING) {
+            throw new BusinessException(ErrorCode.APPLICATION_ALREADY_PROCESSED);
         }
     }
 }
