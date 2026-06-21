@@ -173,6 +173,7 @@ public class ApplicationService {
         }
     }
 
+    @Transactional
     public CancelApplicationResponse cancelApplication(Integer userId, Integer applicationId) {
         Application application = applicationRepository.findByIdAndUserId(applicationId, userId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.APPLICATION_NOT_FOUND));
