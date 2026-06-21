@@ -6,10 +6,12 @@ import io.github.crewhub.dto.application.response.*;
 import io.github.crewhub.dto.common.PageResponse;
 import io.github.crewhub.entity.application.Application;
 import io.github.crewhub.entity.gathering.Gathering;
+import io.github.crewhub.entity.gathering.GatheringMember;
 import io.github.crewhub.entity.gathering.GatheringMemberId;
 import io.github.crewhub.entity.user.User;
 import io.github.crewhub.enums.application.ApplicationStatus;
 import io.github.crewhub.enums.common.ErrorCode;
+import io.github.crewhub.enums.gathering.MemberRole;
 import io.github.crewhub.repository.application.ApplicationRepository;
 import io.github.crewhub.repository.gathering.GatheringMemberRepository;
 import io.github.crewhub.repository.gathering.GatheringRepository;
@@ -20,6 +22,8 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.time.LocalDateTime;
 
 /**
  * 지원서 서비스
@@ -165,7 +169,6 @@ public class ApplicationService {
         if (!gathering.getManager()
                 .getId()
                 .equals(userId)) {
-
             throw new BusinessException(ErrorCode.GATHERING_MANGER_ONLY);
         }
     }
@@ -194,4 +197,61 @@ public class ApplicationService {
         }
     }
 
+    @Transactional
+    public ProcessApplicationResponse approve(Integer managerId, Integer applicationId) {
+        Application application = getApplication(applicationId);
+
+        validateManager(managerId, application.getGathering());
+
+        validatePending(application);
+
+        createGatheringMember(application);
+
+        application.changeStatus(ApplicationStatus.APPROVED);
+
+        return ProcessApplicationResponse.builder()
+                .applicationId(application.getId())
+                .gatheringId(application.getGathering().getId())
+                .userId(application.getUser().getId())
+                .status(application.getStatus())
+                .updatedAt(application.getUpdatedAt())
+                .build();
+    }
+
+    private Application getApplication(Integer applicationId) {
+        return applicationRepository
+                .findForProcess(applicationId)
+                .orElseThrow(
+                        () -> new BusinessException(ErrorCode.APPLICATION_NOT_FOUND)
+                );
+    }
+
+    private void validatePending(Application application) {
+        if (application.getStatus()
+                != ApplicationStatus.PENDING) {
+            throw new BusinessException(ErrorCode.APPLICATION_ALREADY_PROCESSED);
+        }
+    }
+
+    private void createGatheringMember(Application application) {
+        Gathering gathering = application.getGathering();
+
+        User user = application.getUser();
+
+        GatheringMemberId memberId =
+                new GatheringMemberId(gathering.getId(), user.getId());
+
+        if (memberRepository.existsById(memberId)) {
+            throw new BusinessException(ErrorCode.DUPLICATE_GATHERING_MEMBER);
+        }
+
+        GatheringMember member = GatheringMember.builder()
+                        .id(memberId)
+                        .gathering(gathering)
+                        .user(user)
+                        .role(MemberRole.MEMBER)
+                        .build();
+
+        memberRepository.save(member);
+    }
 }
