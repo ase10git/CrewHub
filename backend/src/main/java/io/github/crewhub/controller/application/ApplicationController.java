@@ -1,6 +1,15 @@
 package io.github.crewhub.controller.application;
 
+import io.github.crewhub.common.response.ApiResponse;
+import io.github.crewhub.dto.application.request.CreateApplicationRequest;
+import io.github.crewhub.dto.application.response.CreateApplicationResponse;
+import io.github.crewhub.security.details.CustomUserDetails;
+import io.github.crewhub.service.application.ApplicationService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -11,4 +20,16 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api/application")
 @RequiredArgsConstructor
 public class ApplicationController {
+    private final ApplicationService applicationService;
+
+    @PostMapping
+    public ApiResponse<CreateApplicationResponse> apply(
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            @Valid @RequestBody CreateApplicationRequest request
+            ) {
+        return ApiResponse.success(
+                applicationService.apply(userDetails.getUserId(), request)
+        );
+    }
+
 }
