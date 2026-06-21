@@ -67,4 +67,14 @@ public class ApplicationController {
                 applicationService.approve(userDetails.getUserId(), applicationId)
         );
     }
+
+    @PostMapping("/{applicationId}/reject")
+    public ApiResponse<ProcessApplicationResponse> reject(
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            @PathVariable Integer applicationId
+    ) {
+        return ApiResponse.success(
+                applicationService.reject(userDetails.getUserId(), applicationId)
+        );
+    }
 }
