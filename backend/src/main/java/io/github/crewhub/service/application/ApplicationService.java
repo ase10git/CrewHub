@@ -196,6 +196,30 @@ public class ApplicationService {
     }
 
     @Transactional
+    public CancelApplicationResponse revertApplication(Integer userId, Integer applicationId) {
+        Application application = applicationRepository.findByIdAndUserId(applicationId, userId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.APPLICATION_NOT_FOUND));
+
+        validateRevertable(application);
+
+        application.changeStatus(ApplicationStatus.PENDING);
+
+        return CancelApplicationResponse.builder()
+                .applicationId(application.getId())
+                .gatheringId(application.getGathering().getId())
+                .status(application.getStatus())
+                .updatedAt(application.getUpdatedAt())
+                .build();
+    }
+
+    private void validateRevertable(Application application) {
+        if (application.getStatus()
+                != ApplicationStatus.CANCELLED) {
+            throw new BusinessException(ErrorCode.APPLICATION_NOT_CANCELLED);
+        }
+    }
+
+    @Transactional
     public ProcessApplicationResponse approve(Integer managerId, Integer applicationId) {
         Application application = getApplication(applicationId);
 
