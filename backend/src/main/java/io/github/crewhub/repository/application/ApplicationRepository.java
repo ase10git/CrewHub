@@ -8,8 +8,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-import java.util.List;
-
 /**
  * 지원서 Entity 관리용 Repository
  */
@@ -42,8 +40,9 @@ public interface ApplicationRepository extends JpaRepository<Application, Intege
         and (:status is NULL or a.status = :status)
         order by a.createdAt desc
     """)
-    List<Application> findGatheringApplications(
+    Page<Application> findGatheringApplications(
             @Param("gatheringId") Integer gatheringId,
-            @Param("status") ApplicationStatus status
+            @Param("status") ApplicationStatus status,
+            Pageable pageable
     );
 }

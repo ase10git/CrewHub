@@ -23,8 +23,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
-
 /**
  * 지원서 서비스
  */
@@ -126,29 +124,43 @@ public class ApplicationService {
         );
     }
 
-    public List<GatheringApplicationResponse> getGatheringApplications(
+    public PageResponse<GatheringApplicationResponse> getGatheringApplications(
             Integer userId,
             Integer gatheringId,
-            ApplicationStatus status
+            ApplicationStatus status,
+            int page,
+            int size
     ) {
         User user = getUser(userId);
         Gathering gathering = getGathering(gatheringId);
 
         validateManager(user, gathering);
 
-        return applicationRepository.findGatheringApplications(
-                    gathering.getId(), status
-                )
-                .stream()
-                .map(application -> GatheringApplicationResponse.builder()
-                        .applicationId(application.getId())
-                        .userId(application.getUser().getId())
-                        .username(application.getUser().getUsername())
-                        .status(application.getStatus())
-                        .createdAt(application.getCreatedAt())
-                        .updatedAt(application.getUpdatedAt())
-                        .build())
-                .toList();
+        Pageable pageable =
+                PageRequest.of(page, size);
+
+        Page<Application> applications =
+                applicationRepository.findGatheringApplications(gatheringId, status,pageable);
+
+        return new PageResponse<>(
+                applications.stream()
+                        .map(application
+                                -> GatheringApplicationResponse.builder()
+                                .applicationId(application.getId())
+                                .userId(application.getUser().getId())
+                                .username(application.getUser().getUsername())
+                                .status(application.getStatus())
+                                .createdAt(application.getCreatedAt())
+                                .updatedAt(application.getUpdatedAt())
+                                .build()
+                        )
+                        .toList(),
+                applications.getNumber(),
+                applications.getSize(),
+                applications.getTotalElements(),
+                applications.getTotalPages(),
+                applications.hasNext()
+        );
     }
 
     private void validateManager(User user, Gathering gathering) {
