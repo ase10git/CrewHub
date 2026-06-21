@@ -2,6 +2,7 @@ package io.github.crewhub.controller.application;
 
 import io.github.crewhub.common.response.ApiResponse;
 import io.github.crewhub.dto.application.request.CreateApplicationRequest;
+import io.github.crewhub.dto.application.response.CancelApplicationResponse;
 import io.github.crewhub.dto.application.response.CreateApplicationResponse;
 import io.github.crewhub.dto.application.response.MyApplicationResponse;
 import io.github.crewhub.dto.common.PageResponse;
@@ -46,4 +47,13 @@ public class ApplicationController {
         );
     }
 
+    @PatchMapping("/{applicationId}/cancel")
+    public ApiResponse<CancelApplicationResponse> cancelApplication(
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            @PathVariable Integer applicationId
+    ) {
+        return ApiResponse.success(
+                applicationService.cancelApplication(userDetails.getUserId(), applicationId)
+        );
+    }
 }
