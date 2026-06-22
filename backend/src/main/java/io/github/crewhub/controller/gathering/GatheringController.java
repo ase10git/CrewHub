@@ -5,10 +5,7 @@ import io.github.crewhub.dto.application.response.GatheringApplicationResponse;
 import io.github.crewhub.dto.common.PageResponse;
 import io.github.crewhub.dto.gathering.request.CreateGatheringRequest;
 import io.github.crewhub.dto.gathering.request.UpdateGatheringRequest;
-import io.github.crewhub.dto.gathering.response.CreateGatheringResponse;
-import io.github.crewhub.dto.gathering.response.GatheringDetailResponse;
-import io.github.crewhub.dto.gathering.response.GatheringSummaryResponse;
-import io.github.crewhub.dto.gathering.response.UpdateGatheringResponse;
+import io.github.crewhub.dto.gathering.response.*;
 import io.github.crewhub.enums.application.ApplicationStatus;
 import io.github.crewhub.security.details.CustomUserDetails;
 import io.github.crewhub.service.application.ApplicationService;
@@ -119,6 +116,21 @@ public class GatheringController {
                         page,
                         size
                 )
+        );
+    }
+
+    /**
+     * 모임 회원 관리
+     */
+
+    @GetMapping("/{gatheringId}/members")
+    public ApiResponse<PageResponse<GatheringMemberResponse>> getMembers(
+            @PathVariable Integer gatheringId,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size
+    ) {
+        return ApiResponse.success(
+                gatheringService.getMembers(gatheringId, page, size)
         );
     }
 }
