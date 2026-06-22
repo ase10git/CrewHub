@@ -122,4 +122,16 @@ public class DocumentController {
                 )
         );
     }
+
+    @DeleteMapping("/document/{documentId}")
+    public ApiResponse<Void> delete(
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            @PathVariable Integer documentId
+    ) {
+        documentService.delete(userDetails.getUserId(), documentId);
+
+        return ApiResponse.success(
+                "문서가 삭제되었습니다.", null
+        );
+    }
 }
