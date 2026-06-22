@@ -14,7 +14,7 @@ import java.util.List;
 public record CreateDocumentRequest(
 
         Integer gatheringId,
-        @NotBlank @Size(max = 255) String title,
+        @NotBlank @Size(min = 5, max = 255) String title,
         @NotBlank String content,
         @NotEmpty List<Integer> categoryIds
 ) {
