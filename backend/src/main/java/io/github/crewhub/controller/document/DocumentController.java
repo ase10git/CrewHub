@@ -4,6 +4,7 @@ import io.github.crewhub.common.response.ApiResponse;
 import io.github.crewhub.dto.common.PageResponse;
 import io.github.crewhub.dto.document.request.CreateDocumentRequest;
 import io.github.crewhub.dto.document.response.CreateDocumentResponse;
+import io.github.crewhub.dto.document.response.DocumentDetailResponse;
 import io.github.crewhub.dto.document.response.DocumentSummaryResponse;
 import io.github.crewhub.security.details.CustomUserDetails;
 import io.github.crewhub.service.document.DocumentService;
@@ -46,6 +47,16 @@ public class DocumentController {
                         page,
                         size
                 )
+        );
+    }
+
+    @GetMapping("/document/{documentId}")
+    public ApiResponse<DocumentDetailResponse> getDocument(
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            @PathVariable Integer documentId
+    ) {
+        return ApiResponse.success(
+                documentService.getDocument(userDetails.getUserId(), documentId)
         );
     }
 }
