@@ -176,4 +176,47 @@ public class GatheringMemberService {
 
         validateLastManagerRemoval(targetMember, ErrorCode.LAST_MANAGER_CANNOT_BE_REMOVED);
     }
+
+    @Transactional
+    public TransferManagerResponse transferManager(
+            Integer managerId,
+            Integer gatheringId,
+            Integer targetUserId
+    ) {
+        Gathering gathering = findGathering(gatheringId);
+
+        validateManager(managerId, gathering);
+        validateTransfer(managerId, targetUserId);
+
+        GatheringMember currentManager = getMember(gatheringId, managerId);
+        GatheringMember newManager = getMember(gatheringId, targetUserId);
+
+        validateTarget(newManager);
+
+        currentManager.changeRole(MemberRole.MEMBER);
+
+        newManager.changeRole(MemberRole.MANAGER);
+
+        gathering.changeManager(newManager.getUser());
+
+        return TransferManagerResponse.builder()
+                .gatheringId(gatheringId)
+                .previousManagerId(managerId)
+                .newManagerId(targetUserId)
+                .newManagerName(newManager.getUser().getUsername())
+                .transferredAt(LocalDateTime.now())
+                .build();
+    }
+
+    private void validateTransfer(Integer managerId, Integer targetUserId) {
+        if (managerId.equals(targetUserId)) {
+            throw new BusinessException(ErrorCode.CANNOT_TRANSFER_TO_SELF);
+        }
+    }
+
+    private void validateTarget(GatheringMember newManager) {
+        if (newManager.getRole().equals(MemberRole.MANAGER)) {
+            throw new BusinessException(ErrorCode.ALREADY_MANAGER);
+        }
+    }
 }
