@@ -34,4 +34,13 @@ public interface GatheringMemberRepository extends JpaRepository<GatheringMember
     );
     long countByGatheringId(Integer gatheringId);
     long countByGatheringIdAndRole(Integer gatheringId, MemberRole role);
+    @Query("""
+        select gm
+        from GatheringMember gm
+        join fetch gm.gathering g
+        join fetch g.category
+        where gm.user.id = :userId
+        and g.isDeleted = false
+    """)
+    Page<GatheringMember> findMyGatherings(@Param("userId") Integer userId, Pageable pageable);
 }
