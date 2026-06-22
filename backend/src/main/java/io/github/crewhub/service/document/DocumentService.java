@@ -3,6 +3,7 @@ package io.github.crewhub.service.document;
 import io.github.crewhub.common.exception.BusinessException;
 import io.github.crewhub.dto.common.PageResponse;
 import io.github.crewhub.dto.document.request.CreateDocumentRequest;
+import io.github.crewhub.dto.document.request.UpdateDocumentRequest;
 import io.github.crewhub.dto.document.response.*;
 import io.github.crewhub.entity.document.Document;
 import io.github.crewhub.entity.document.DocumentCategory;
@@ -25,6 +26,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * 문서 서비스
@@ -310,4 +313,101 @@ public class DocumentService {
                 documents.hasNext()
         );
     }
+
+    @Transactional
+    public UpdateDocumentResponse update(
+            Integer userId,
+            Integer documentId,
+            UpdateDocumentRequest request
+    ) {
+        getUser(userId);
+
+        Document document = findDocument(documentId);
+
+        validateWriter(userId, document);
+
+        Gathering gathering = findGathering(document.getGathering().getId());
+
+        validateMember(userId, gathering.getId());
+
+        List<DocumentCategory> categories =
+                categoryRepository.findAllById(request.categoryIds());
+
+        if (categories.size() != request.categoryIds().size()) {
+            throw new BusinessException(ErrorCode.CATEGORY_NOT_FOUND);
+        }
+
+        document.updateDocument(request.title(), request.content());
+
+        Document saved = documentRepository.save(document);
+
+        updateCategories(saved, categories);
+
+        return UpdateDocumentResponse.builder()
+                .documentId(saved.getId())
+                .title(saved.getTitle())
+                .content(saved.getContent())
+                .categories(
+                        categories.stream()
+                                .map(DocumentCategory::getLabel)
+                                .toList()
+                )
+                .updatedAt(saved.getUpdatedAt())
+                .build();
+    }
+
+    private void validateWriter(Integer userId, Document document) {
+        if (!userId.equals(document.getWriter().getId())) {
+            throw new BusinessException(ErrorCode.WRITER_ONLY);
+        }
+    }
+
+    private Document findDocument(Integer documentId) {
+        return documentRepository.findById(documentId).orElseThrow(
+                () -> new BusinessException(ErrorCode.DOCUMENT_NOT_FOUND)
+        );
+    }
+
+    private void updateCategories(Document document, List<DocumentCategory> categories) {
+        List<DocumentCategoryMap> existingMaps =
+                categoryMapRepository.findAllByDocumentId(document.getId());
+
+        Set<Integer> existingCategoryIds = existingMaps.stream()
+                            .map(map -> map.getCategory().getId())
+                            .collect(Collectors.toSet());
+
+        Set<Integer> requestCategoryIds = categories.stream()
+                            .map(DocumentCategory::getId)
+                            .collect(Collectors.toSet());
+
+        existingMaps.stream()
+                    .filter(map ->
+                            !requestCategoryIds.contains(
+                                    map.getCategory().getId()
+                            )
+                    )
+                    .forEach(categoryMapRepository::delete);
+
+        categories.stream()
+                .filter(category ->
+                        !existingCategoryIds.contains(
+                                category.getId()
+                        )
+                )
+                .forEach(category -> {
+                    DocumentCategoryMap map =
+                            DocumentCategoryMap.builder()
+                                    .id(
+                                        new DocumentCategoryMapId(
+                                                document.getId(),
+                                                category.getId()
+                                        )
+                                    )
+                                    .document(document)
+                                    .category(category)
+                                    .build();
+
+                    categoryMapRepository.save(map);
+                });
+        }
 }
