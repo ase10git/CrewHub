@@ -2,6 +2,8 @@ package io.github.crewhub.repository.document;
 
 import io.github.crewhub.entity.document.DocumentCategoryMap;
 import io.github.crewhub.entity.document.DocumentCategoryMapId;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -21,4 +23,17 @@ public interface DocumentCategoryMapRepository extends JpaRepository<DocumentCat
         where dcm.document.id = :documentId
     """)
     List<DocumentCategoryMap> findDocumentCategory(@Param("documentId") Integer documentId);
+    @Query("""
+        select dcm
+        from DocumentCategoryMap dcm
+        join fetch dcm.category
+        join fetch dcm.document
+        where dcm.document.gathering.id = :gatheringId
+        and dcm.category.id = :categoryId
+    """)
+    Page<DocumentCategoryMap> findDocumentByCategory(
+            @Param("gatheringId") Integer gatheringId,
+            @Param("categoryId") Integer categoryId,
+            Pageable pageable
+    );
 }
