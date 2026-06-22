@@ -46,4 +46,12 @@ public class Document extends BaseEntity {
     @Builder.Default
     @Column(name = "is_deleted", nullable = false)
     private Boolean isDeleted = false;
+
+    public void updateDocument(
+            String title,
+            String content
+    ) {
+        this.title = title;
+        this.content = content;
+    }
 }
