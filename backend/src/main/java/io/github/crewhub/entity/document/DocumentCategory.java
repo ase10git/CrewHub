@@ -11,6 +11,8 @@ import lombok.*;
 @Table(name = "document_categories")
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@AllArgsConstructor(access = AccessLevel.PRIVATE)
+@Builder
 public class DocumentCategory extends BaseEntity {
 
     @Id

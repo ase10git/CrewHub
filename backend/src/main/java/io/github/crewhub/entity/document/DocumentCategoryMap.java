@@ -10,6 +10,8 @@ import lombok.*;
 @Table(name = "document_categories_map")
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@AllArgsConstructor(access = AccessLevel.PRIVATE)
+@Builder
 public class DocumentCategoryMap {
 
     @EmbeddedId
