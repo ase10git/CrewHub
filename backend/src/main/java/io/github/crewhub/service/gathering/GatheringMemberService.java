@@ -253,4 +253,15 @@ public class GatheringMemberService {
                 gatherings.hasNext()
         );
     }
+
+    public GatheringMemberCountResponse getMemberCount(Integer gatheringId) {
+        findGathering(gatheringId);
+
+        long memberCount = memberRepository.countByGatheringId(gatheringId);
+
+        return GatheringMemberCountResponse.builder()
+                .gatheringId(gatheringId)
+                .memberCount(memberCount)
+                .build();
+    }
 }
