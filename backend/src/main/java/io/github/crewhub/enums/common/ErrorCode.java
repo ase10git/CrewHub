@@ -28,6 +28,7 @@ public enum ErrorCode {
     APPLICATION_ALREADY_PROCESSED(HttpStatus.BAD_REQUEST, "이미 처리된 지원서입니다."),
     APPLICATION_NOT_CANCELLED(HttpStatus.BAD_REQUEST, "취소된 지원서만 복구할 수 있습니다."),
     CANNOT_KICK_SELF(HttpStatus.BAD_REQUEST, "자신은 강제 탈퇴시킬 수 없습니다."),
+    CANNOT_TRANSFER_TO_SELF(HttpStatus.BAD_REQUEST, "자기 자신에게 관리자 권한을 위임할 수 없습니다."),
 
     ACCESS_DENIED(HttpStatus.FORBIDDEN, "접근 권한이 없습니다."),
     GATHERING_MANAGER_ONLY(HttpStatus.FORBIDDEN, "모임 관리자만 가능합니다."),
