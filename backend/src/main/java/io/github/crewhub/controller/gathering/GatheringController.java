@@ -10,6 +10,7 @@ import io.github.crewhub.enums.application.ApplicationStatus;
 import io.github.crewhub.enums.gathering.MemberRole;
 import io.github.crewhub.security.details.CustomUserDetails;
 import io.github.crewhub.service.application.ApplicationService;
+import io.github.crewhub.service.gathering.GatheringMemberService;
 import io.github.crewhub.service.gathering.GatheringService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -26,6 +27,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class GatheringController {
     private final GatheringService gatheringService;
+    private final GatheringMemberService gatheringMemberService;
     private final ApplicationService applicationService;
 
     @GetMapping
@@ -132,7 +134,7 @@ public class GatheringController {
             @RequestParam(defaultValue = "10") int size
     ) {
         return ApiResponse.success(
-                gatheringService.getMembers(gatheringId, role, page, size)
+                gatheringMemberService.getMembers(gatheringId, role, page, size)
         );
     }
 
@@ -142,7 +144,7 @@ public class GatheringController {
             @PathVariable Integer gatheringId
     ) {
         return ApiResponse.success(
-                gatheringService.leave(userDetails.getUserId(), gatheringId)
+                gatheringMemberService.leave(userDetails.getUserId(), gatheringId)
         );
     }
 
@@ -153,7 +155,7 @@ public class GatheringController {
             @PathVariable Integer userId
     ) {
         return ApiResponse.success(
-                gatheringService.kickMember(userDetails.getUserId(), gatheringId, userId)
+                gatheringMemberService.kickMember(userDetails.getUserId(), gatheringId, userId)
         );
     }
 }
