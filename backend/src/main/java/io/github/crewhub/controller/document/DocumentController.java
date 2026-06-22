@@ -134,4 +134,11 @@ public class DocumentController {
                 "문서가 삭제되었습니다.", null
         );
     }
+
+    @GetMapping("/gathering/{gatheringId}/document/count")
+    public ApiResponse<GatheringDocumentCountResponse> getMemberCount(
+            @PathVariable Integer gatheringId
+    ) {
+        return ApiResponse.success(documentService.getDocumentCount(gatheringId));
+    }
 }
