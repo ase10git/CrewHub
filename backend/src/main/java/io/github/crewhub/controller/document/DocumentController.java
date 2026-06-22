@@ -3,10 +3,8 @@ package io.github.crewhub.controller.document;
 import io.github.crewhub.common.response.ApiResponse;
 import io.github.crewhub.dto.common.PageResponse;
 import io.github.crewhub.dto.document.request.CreateDocumentRequest;
-import io.github.crewhub.dto.document.response.CreateDocumentResponse;
-import io.github.crewhub.dto.document.response.DocumentDetailResponse;
-import io.github.crewhub.dto.document.response.DocumentSummaryResponse;
-import io.github.crewhub.dto.document.response.MyDocumentResponse;
+import io.github.crewhub.dto.document.request.UpdateDocumentRequest;
+import io.github.crewhub.dto.document.response.*;
 import io.github.crewhub.security.details.CustomUserDetails;
 import io.github.crewhub.service.document.DocumentService;
 import jakarta.validation.Valid;
@@ -107,6 +105,21 @@ public class DocumentController {
     ) {
         return ApiResponse.success(
                 documentService.getMyDocuments(userDetails.getUserId(), page, size)
+        );
+    }
+
+    @PutMapping("/document/{documentId}")
+    public ApiResponse<UpdateDocumentResponse> update(
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            @PathVariable Integer documentId,
+            @Valid @RequestBody UpdateDocumentRequest request
+    ) {
+        return ApiResponse.success(
+                documentService.update(
+                        userDetails.getUserId(),
+                        documentId,
+                        request
+                )
         );
     }
 }
