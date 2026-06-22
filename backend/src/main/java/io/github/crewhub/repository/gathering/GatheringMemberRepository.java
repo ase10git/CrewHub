@@ -33,4 +33,5 @@ public interface GatheringMemberRepository extends JpaRepository<GatheringMember
             Pageable pageable
     );
     long countByGatheringId(Integer gatheringId);
+    long countByGatheringIdAndRole(Integer gatheringId, MemberRole role);
 }
