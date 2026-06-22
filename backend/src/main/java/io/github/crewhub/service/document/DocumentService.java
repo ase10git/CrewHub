@@ -218,6 +218,40 @@ public class DocumentService {
         );
     }
 
+    public PageResponse<DocumentSummaryResponse> searchByCategory(
+            Integer userId,
+            Integer gatheringId,
+            Integer categoryId,
+            int page,
+            int size
+    ) {
+        Gathering gathering = findGathering(gatheringId);
+
+        validateMember(userId, gathering.getId());
+
+        Pageable pageable = PageRequest.of(page, size);
+
+        getCategory(categoryId);
+
+        Page<DocumentCategoryMap> documentCategoryMaps =
+                categoryMapRepository.findDocumentByCategory(
+                        gatheringId,
+                        categoryId,
+                        pageable
+                );
+
+        return new PageResponse<>(
+                documentCategoryMaps.stream()
+                        .map(this::toSummaryResponse)
+                        .toList(),
+                documentCategoryMaps.getNumber(),
+                documentCategoryMaps.getSize(),
+                documentCategoryMaps.getTotalElements(),
+                documentCategoryMaps.getTotalPages(),
+                documentCategoryMaps.hasNext()
+        );
+    }
+
     private DocumentSummaryResponse toSummaryResponse(Document document) {
         return DocumentSummaryResponse.builder()
                 .documentId(document.getId())
@@ -228,5 +262,24 @@ public class DocumentService {
                 .createdAt(document.getCreatedAt())
                 .updatedAt(document.getUpdatedAt())
                 .build();
+    }
+
+    private DocumentSummaryResponse toSummaryResponse(DocumentCategoryMap documentCategoryMaps) {
+        return DocumentSummaryResponse.builder()
+                .documentId(documentCategoryMaps.getDocument().getId())
+                .title(documentCategoryMaps.getDocument().getTitle())
+                .writerId(documentCategoryMaps.getDocument().getWriter().getId())
+                .writerName(documentCategoryMaps.getDocument().getWriter().getUsername())
+                .views(documentCategoryMaps.getDocument().getViews())
+                .createdAt(documentCategoryMaps.getDocument().getCreatedAt())
+                .updatedAt(documentCategoryMaps.getDocument().getUpdatedAt())
+                .build();
+    }
+
+    private DocumentCategory getCategory(Integer categoryId) {
+        return categoryRepository
+                .findById(categoryId).orElseThrow(
+                        () -> new BusinessException(ErrorCode.CATEGORY_NOT_FOUND)
+                );
     }
 }
