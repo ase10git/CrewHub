@@ -216,6 +216,7 @@ public class GatheringService {
     
     public PageResponse<GatheringMemberResponse> getMembers(
             Integer gatheringId,
+            MemberRole role,
             int page,
             int size
     ) {
@@ -225,7 +226,7 @@ public class GatheringService {
         Pageable pageable = PageRequest.of(page, size);
 
         Page<GatheringMember> members =
-                memberRepository.findByGatheringId(gatheringId, pageable);
+                memberRepository.findMembers(gatheringId, role, pageable);
 
         return new PageResponse<>(
                 members.stream()

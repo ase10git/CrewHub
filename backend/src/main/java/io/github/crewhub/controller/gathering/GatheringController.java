@@ -7,6 +7,7 @@ import io.github.crewhub.dto.gathering.request.CreateGatheringRequest;
 import io.github.crewhub.dto.gathering.request.UpdateGatheringRequest;
 import io.github.crewhub.dto.gathering.response.*;
 import io.github.crewhub.enums.application.ApplicationStatus;
+import io.github.crewhub.enums.gathering.MemberRole;
 import io.github.crewhub.security.details.CustomUserDetails;
 import io.github.crewhub.service.application.ApplicationService;
 import io.github.crewhub.service.gathering.GatheringService;
@@ -126,11 +127,12 @@ public class GatheringController {
     @GetMapping("/{gatheringId}/members")
     public ApiResponse<PageResponse<GatheringMemberResponse>> getMembers(
             @PathVariable Integer gatheringId,
+            @RequestParam(required = false) MemberRole role,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size
     ) {
         return ApiResponse.success(
-                gatheringService.getMembers(gatheringId, page, size)
+                gatheringService.getMembers(gatheringId, role, page, size)
         );
     }
 }
