@@ -11,7 +11,7 @@ import java.util.List;
 @Builder
 public record DocumentDetailResponse(
         Integer documentId,
-        List<CategoryResponse> categoryId,
+        List<CategoryResponse> categoryList,
         Integer writerId,
         String writerName,
         Integer gatheringId,
