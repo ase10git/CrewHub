@@ -59,4 +59,23 @@ public class DocumentController {
                 documentService.getDocument(userDetails.getUserId(), documentId)
         );
     }
+
+    @GetMapping("/gathering/{gatheringId}/document/search")
+    public ApiResponse<PageResponse<DocumentSummaryResponse>> searchByName(
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            @PathVariable Integer gatheringId,
+            @RequestParam String keyword,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size
+    ) {
+        return ApiResponse.success(
+                documentService.searchByTitle(
+                        userDetails.getUserId(),
+                        gatheringId,
+                        keyword,
+                        page,
+                        size
+                )
+        );
+    }
 }
