@@ -78,4 +78,23 @@ public class DocumentController {
                 )
         );
     }
+
+    @GetMapping("/gathering/{gatheringId}/document/category/{categoryId}")
+    public ApiResponse<PageResponse<DocumentSummaryResponse>> searchByCategory(
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            @PathVariable Integer gatheringId,
+            @PathVariable Integer categoryId,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size
+    ) {
+        return ApiResponse.success(
+                documentService.searchByCategory(
+                        userDetails.getUserId(),
+                        gatheringId,
+                        categoryId,
+                        page,
+                        size
+                )
+        );
+    }
 }
