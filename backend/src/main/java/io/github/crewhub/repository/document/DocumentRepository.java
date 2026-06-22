@@ -27,4 +27,17 @@ public interface DocumentRepository extends JpaRepository<Document, Integer> {
     """
     )
     Optional<Document> findDetailById(@Param("documentId") Integer documentId);
+    @Query("""
+        select d
+        from Document d
+        where d.isDeleted = false
+        and d.gathering.id = :gatheringId
+        and lower(d.title)
+        like lower(concat('%', :keyword, '%'))
+    """)
+    Page<Document> findByTitle(
+            @Param("gatheringId") Integer gatheringId,
+            @Param("keyword") String keyword,
+            Pageable pageable
+    );
 }
