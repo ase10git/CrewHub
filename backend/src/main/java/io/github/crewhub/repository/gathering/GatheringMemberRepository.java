@@ -10,4 +10,5 @@ import org.springframework.stereotype.Repository;
  */
 @Repository
 public interface GatheringMemberRepository extends JpaRepository<GatheringMember, GatheringMemberId> {
+    boolean existsByGatheringIdAndUserId(Integer gatheringId, Integer userId);
 }

@@ -22,6 +22,8 @@ import lombok.*;
 )
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@AllArgsConstructor(access = AccessLevel.PRIVATE)
+@Builder
 public class Application extends BaseEntity {
 
     @Id
@@ -39,4 +41,8 @@ public class Application extends BaseEntity {
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false, length = 20)
     private ApplicationStatus status;
+
+    public void changeStatus(ApplicationStatus status) {
+        this.status = status;
+    }
 }
