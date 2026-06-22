@@ -169,4 +169,15 @@ public class GatheringController {
                 gatheringMemberService.transferManager(userDetails.getUserId(), gatheringId, userId)
         );
     }
+
+    @GetMapping("/my")
+    public ApiResponse<PageResponse<MyGatheringResponse>> getMyGatherings(
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size
+    ) {
+        return ApiResponse.success(
+                gatheringMemberService.getMyGatherings(userDetails.getUserId(), page, size)
+        );
+    }
 }
