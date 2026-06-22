@@ -1,8 +1,10 @@
 package io.github.crewhub.service.document;
 
 import io.github.crewhub.common.exception.BusinessException;
+import io.github.crewhub.dto.common.PageResponse;
 import io.github.crewhub.dto.document.request.CreateDocumentRequest;
 import io.github.crewhub.dto.document.response.CreateDocumentResponse;
+import io.github.crewhub.dto.document.response.DocumentSummaryResponse;
 import io.github.crewhub.entity.document.Document;
 import io.github.crewhub.entity.document.DocumentCategory;
 import io.github.crewhub.entity.document.DocumentCategoryMap;
@@ -17,6 +19,9 @@ import io.github.crewhub.repository.gathering.GatheringMemberRepository;
 import io.github.crewhub.repository.gathering.GatheringRepository;
 import io.github.crewhub.repository.user.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -108,5 +113,43 @@ public class DocumentService {
         if (!exists) {
             throw new BusinessException(ErrorCode.GATHERING_MEMBER_ONLY);
         }
+    }
+
+    public PageResponse<DocumentSummaryResponse> getDocuments(
+            Integer userId,
+            Integer gatheringId,
+            int page,
+            int size
+    ) {
+        validateMember(userId, gatheringId);
+
+        Pageable pageable = PageRequest.of(page, size);
+
+        Page<Document> documents =
+                documentRepository.findByGatheringIdAndIsDeletedFalse(
+                        gatheringId,
+                        pageable
+                );
+
+        return new PageResponse<>(
+                documents.stream()
+                        .map(document ->
+                                DocumentSummaryResponse.builder()
+                                        .documentId(document.getId())
+                                        .title(document.getTitle())
+                                        .writerId(document.getWriter().getId())
+                                        .writerName(document.getWriter().getUsername())
+                                        .views(document.getViews())
+                                        .createdAt(document.getCreatedAt())
+                                        .updatedAt(document.getUpdatedAt())
+                                        .build()
+                        )
+                        .toList(),
+                documents.getNumber(),
+                documents.getSize(),
+                documents.getTotalElements(),
+                documents.getTotalPages(),
+                documents.hasNext()
+        );
     }
 }
