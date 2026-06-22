@@ -23,9 +23,11 @@ public enum ErrorCode {
     DUPLICATE_GATHERING_NAME(HttpStatus.CONFLICT, "이미 사용중인 모임 이름입니다."),
     DUPLICATE_GATHERING_MEMBER(HttpStatus.CONFLICT, "이미 가입한 모임입니다."),
     DUPLICATE_APPLICATION(HttpStatus.CONFLICT, "이미 지원한 모임입니다."),
+    LAST_MANAGER_CANNOT_BE_REMOVED(HttpStatus.CONFLICT, "모임에 관리자가 최소 1명 이상 존재해야 합니다."),
 
     APPLICATION_ALREADY_PROCESSED(HttpStatus.BAD_REQUEST, "이미 처리된 지원서입니다."),
     APPLICATION_NOT_CANCELLED(HttpStatus.BAD_REQUEST, "취소된 지원서만 복구할 수 있습니다."),
+    CANNOT_KICK_SELF(HttpStatus.BAD_REQUEST, "자신은 강제 탈퇴시킬 수 없습니다."),
 
     ACCESS_DENIED(HttpStatus.FORBIDDEN, "접근 권한이 없습니다."),
     GATHERING_MANAGER_ONLY(HttpStatus.FORBIDDEN, "모임 관리자만 가능합니다."),
