@@ -27,12 +27,13 @@ public interface DocumentCategoryMapRepository extends JpaRepository<DocumentCat
     @Query("""
         select dcm
         from DocumentCategoryMap dcm
-        join fetch dcm.category
-        join fetch dcm.document
-        where dcm.document.gathering.id = :gatheringId
-        and dcm.category.id = :categoryId
+        join fetch dcm.category c
+        join fetch dcm.document d
+        where d.gathering.id = :gatheringId
+        and c.id = :categoryId
+        and d.isDeleted = false
     """)
-    Page<DocumentCategoryMap> findDocumentByCategory(
+    Page<DocumentCategoryMap> findAllByCategory(
             @Param("gatheringId") Integer gatheringId,
             @Param("categoryId") Integer categoryId,
             Pageable pageable

@@ -234,7 +234,7 @@ public class DocumentService {
         getCategory(categoryId);
 
         Page<DocumentCategoryMap> documentCategoryMaps =
-                categoryMapRepository.findDocumentByCategory(
+                categoryMapRepository.findAllByCategory(
                         gatheringId,
                         categoryId,
                         pageable
