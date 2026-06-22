@@ -23,6 +23,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 /**
@@ -196,7 +197,7 @@ public class GatheringService {
                 .getId()
                 .equals(userId)) {
 
-            throw new BusinessException(ErrorCode.GATHERING_MANGER_ONLY);
+            throw new BusinessException(ErrorCode.GATHERING_MANAGER_ONLY);
         }
     }
 
@@ -246,5 +247,61 @@ public class GatheringService {
                 members.getTotalPages(),
                 members.hasNext()
         );
+    }
+
+    @Transactional
+    public LeaveGatheringResponse leave(Integer userId, Integer gatheringId) {
+        GatheringMemberId id = new GatheringMemberId(gatheringId, userId);
+
+        GatheringMember member =
+                memberRepository.findById(id)
+                        .orElseThrow(
+                                () -> new BusinessException(ErrorCode.GATHERING_MEMBER_NOT_FOUND)
+                        );
+
+        validateManagerLeave(member);
+
+        memberRepository.delete(member);
+
+        deleteGatheringIfEmpty(gatheringId);
+
+        return LeaveGatheringResponse.builder()
+                .gatheringId(gatheringId)
+                .userId(userId)
+                .message("모임에서 탈퇴했습니다.")
+                .leftAt(LocalDateTime.now())
+                .build();
+    }
+
+    private void validateManagerLeave(GatheringMember member) {
+        if (member.getRole() != MemberRole.MANAGER) {
+            return;
+        }
+
+        long managerCount = memberRepository.countByGatheringIdAndRole(
+                member.getGathering().getId(),
+                MemberRole.MANAGER
+        );
+
+        long memberCount = memberRepository.countByGatheringId(member.getGathering().getId());
+
+        if (managerCount == 1 && memberCount > 1) {
+            throw new BusinessException(ErrorCode.MANAGER_CANNOT_LEAVE);
+        }
+    }
+
+    private void deleteGatheringIfEmpty(Integer gatheringId) {
+        long memberCount =
+                memberRepository.countByGatheringId(gatheringId);
+
+        if (memberCount == 0) {
+            Gathering gathering =
+                    gatheringRepository.findById(gatheringId)
+                            .orElseThrow(
+                                    () -> new BusinessException(ErrorCode.GATHERING_NOT_FOUND)
+                            );
+
+            gathering.delete();
+        }
     }
 }
