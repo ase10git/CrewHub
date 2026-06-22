@@ -3,7 +3,9 @@ package io.github.crewhub.service.document;
 import io.github.crewhub.common.exception.BusinessException;
 import io.github.crewhub.dto.common.PageResponse;
 import io.github.crewhub.dto.document.request.CreateDocumentRequest;
+import io.github.crewhub.dto.document.response.CategoryResponse;
 import io.github.crewhub.dto.document.response.CreateDocumentResponse;
+import io.github.crewhub.dto.document.response.DocumentDetailResponse;
 import io.github.crewhub.dto.document.response.DocumentSummaryResponse;
 import io.github.crewhub.entity.document.Document;
 import io.github.crewhub.entity.document.DocumentCategory;
@@ -151,5 +153,41 @@ public class DocumentService {
                 documents.getTotalPages(),
                 documents.hasNext()
         );
+    }
+
+    public DocumentDetailResponse getDocument(Integer userId, Integer documentId) {
+        Document document =
+                documentRepository.findDetailById(documentId)
+                        .orElseThrow(
+                                () -> new BusinessException(ErrorCode.DOCUMENT_NOT_FOUND)
+                        );
+
+        validateMember(userId, document.getGathering().getId());
+
+        List<CategoryResponse> categoryResponseList =
+                categoryMapRepository.findDocumentCategory(documentId)
+                        .stream()
+                        .map(categoryMap ->
+                                CategoryResponse.builder()
+                                        .categoryId(categoryMap.getCategory().getId())
+                                        .key(categoryMap.getCategory().getKey())
+                                        .label(categoryMap.getCategory().getLabel())
+                                        .build())
+                        .toList();
+
+        return DocumentDetailResponse.builder()
+                .documentId(documentId)
+                .categoryList(categoryResponseList)
+                .writerId(document.getWriter().getId())
+                .writerName(document.getWriter().getUsername())
+                .gatheringId(document.getGathering().getId())
+                .gatheringName(document.getGathering().getGatheringName())
+                .title(document.getTitle())
+                .content(document.getContent())
+                .views(document.getViews())
+                .isDeleted(document.getIsDeleted())
+                .createdAt(document.getCreatedAt())
+                .updatedAt(document.getUpdatedAt())
+                .build();
     }
 }
