@@ -49,4 +49,5 @@ public interface DocumentRepository extends JpaRepository<Document, Integer> {
     """)
     Page<Document> findByWriterId(@Param("writerId") Integer writerId, Pageable pageable);
     long countByGatheringId(Integer gatheringId);
+    long countByWriterId(Integer writerId);
 }
