@@ -264,4 +264,15 @@ public class GatheringMemberService {
                 .memberCount(memberCount)
                 .build();
     }
+
+    public CheckMembershipResponse checkMembership(Integer userId, Integer gatheringId) {
+        boolean joined =
+                memberRepository.existsByGatheringIdAndUserId(gatheringId, userId);
+
+        return CheckMembershipResponse.builder()
+                .gatheringId(gatheringId)
+                .userId(userId)
+                .joined(joined)
+                .build();
+    }
 }
