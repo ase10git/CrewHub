@@ -40,4 +40,12 @@ public interface DocumentRepository extends JpaRepository<Document, Integer> {
             @Param("keyword") String keyword,
             Pageable pageable
     );
+    @Query("""
+        select d
+        from Document d
+        join fetch d.writer
+        join fetch d.gathering
+        where d.writer.id = :writerId
+    """)
+    Page<Document> findByWriterId(@Param("writerId") Integer writerId, Pageable pageable);
 }
