@@ -1,12 +1,10 @@
 package io.github.crewhub.service.gathering;
 
 import io.github.crewhub.common.exception.BusinessException;
+import io.github.crewhub.dto.common.PageResponse;
 import io.github.crewhub.dto.gathering.request.CreateGatheringRequest;
 import io.github.crewhub.dto.gathering.request.UpdateGatheringRequest;
-import io.github.crewhub.dto.gathering.response.CreateGatheringResponse;
-import io.github.crewhub.dto.gathering.response.GatheringDetailResponse;
-import io.github.crewhub.dto.gathering.response.GatheringSummaryResponse;
-import io.github.crewhub.dto.gathering.response.UpdateGatheringResponse;
+import io.github.crewhub.dto.gathering.response.*;
 import io.github.crewhub.entity.gathering.Gathering;
 import io.github.crewhub.entity.gathering.GatheringCategory;
 import io.github.crewhub.entity.gathering.GatheringMember;
@@ -19,6 +17,9 @@ import io.github.crewhub.repository.gathering.GatheringMemberRepository;
 import io.github.crewhub.repository.gathering.GatheringRepository;
 import io.github.crewhub.repository.user.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -206,5 +207,43 @@ public class GatheringService {
         validateManager(userId, gathering);
 
         gathering.delete();
+    }
+
+    /**
+     * 모임 회원 관리
+     */
+    
+    
+    public PageResponse<GatheringMemberResponse> getMembers(
+            Integer gatheringId,
+            int page,
+            int size
+    ) {
+
+        getGathering(gatheringId);
+
+        Pageable pageable = PageRequest.of(page, size);
+
+        Page<GatheringMember> members =
+                memberRepository.findByGatheringId(gatheringId, pageable);
+
+        return new PageResponse<>(
+                members.stream()
+                        .map(member ->
+                                GatheringMemberResponse.builder()
+                                        .userId(member.getUser().getId())
+                                        .username(member.getUser().getUsername())
+                                        .role(member.getRole())
+                                        .createdAt(member.getCreatedAt())
+                                        .updatedAt(member.getUpdatedAt())
+                                        .build()
+                        )
+                        .toList(),
+                members.getNumber(),
+                members.getSize(),
+                members.getTotalElements(),
+                members.getTotalPages(),
+                members.hasNext()
+        );
     }
 }
