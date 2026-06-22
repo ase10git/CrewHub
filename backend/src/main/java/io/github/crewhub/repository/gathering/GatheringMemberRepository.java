@@ -18,16 +18,7 @@ import java.util.Optional;
 @Repository
 public interface GatheringMemberRepository extends JpaRepository<GatheringMember, GatheringMemberId> {
     boolean existsByGatheringIdAndUserId(Integer gatheringId, Integer userId);
-    @Query("""
-        select gm
-        from GatheringMember gm
-        where gm.gathering.id = :gatheringId
-        and gm.user.id = :userId
-    """)
-    Optional<GatheringMember> findMember(
-            @Param("gatheringId") Integer gatheringId,
-            @Param("userId") Integer userId
-    );
+    Optional<GatheringMember> findById(GatheringMemberId id);
     Page<GatheringMember> findByUserId(Integer userId, Pageable pageable);
     @Query("""
         select gm
@@ -41,4 +32,5 @@ public interface GatheringMemberRepository extends JpaRepository<GatheringMember
             @Param("role") MemberRole role,
             Pageable pageable
     );
+    long countByGatheringId(Integer gatheringId);
 }
