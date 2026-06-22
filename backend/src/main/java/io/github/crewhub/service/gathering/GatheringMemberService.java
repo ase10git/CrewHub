@@ -275,4 +275,22 @@ public class GatheringMemberService {
                 .joined(joined)
                 .build();
     }
+
+    public CheckManagerResponse checkManager(Integer userId, Integer gatheringId) {
+        GatheringMember member =
+                memberRepository.findById(
+                        new GatheringMemberId(gatheringId, userId)
+                ).orElseThrow(
+                        () -> new BusinessException(ErrorCode.GATHERING_MEMBER_NOT_FOUND)
+                );
+
+        boolean isManager = member.getRole() == MemberRole.MANAGER;
+
+        return CheckManagerResponse.builder()
+                .gatheringId(gatheringId)
+                .userId(userId)
+                .manager(isManager)
+                .role(member.getRole())
+                .build();
+    }
 }
