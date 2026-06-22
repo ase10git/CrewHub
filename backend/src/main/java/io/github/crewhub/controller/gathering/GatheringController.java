@@ -18,8 +18,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
-
 /**
  * 모임 정보 요청 처리
  */
@@ -31,9 +29,12 @@ public class GatheringController {
     private final ApplicationService applicationService;
 
     @GetMapping
-    public ApiResponse<List<GatheringSummaryResponse>> getGatherings() {
+    public ApiResponse<PageResponse<GatheringSummaryResponse>> getGatherings(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size
+    ) {
         return ApiResponse.success(
-                gatheringService.getGatherings()
+                gatheringService.getGatherings(page, size)
         );
     }
 
@@ -47,20 +48,24 @@ public class GatheringController {
     }
 
     @GetMapping("/search")
-    public ApiResponse<List<GatheringSummaryResponse>> searchByName(
-            @RequestParam String keyword
+    public ApiResponse<PageResponse<GatheringSummaryResponse>> searchByName(
+            @RequestParam String keyword,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size
     ) {
         return ApiResponse.success(
-                gatheringService.searchByName(keyword)
+                gatheringService.searchByName(keyword, page, size)
         );
     }
 
     @GetMapping("/category/{categoryId}")
-    public ApiResponse<List<GatheringSummaryResponse>> searchByCategory(
-            @PathVariable Integer categoryId
+    public ApiResponse<PageResponse<GatheringSummaryResponse>> searchByCategory(
+            @PathVariable Integer categoryId,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size
     ) {
         return ApiResponse.success(
-                gatheringService.searchByCategory(categoryId)
+                gatheringService.searchByCategory(categoryId, page, size)
         );
     }
 
