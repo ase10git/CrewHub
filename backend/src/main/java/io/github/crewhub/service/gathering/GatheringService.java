@@ -65,6 +65,15 @@ public class GatheringService {
                 .build();
     }
 
+    private Gathering getGatheringById(Integer gatheringId) {
+        return gatheringRepository.findDetailById(gatheringId)
+                .orElseThrow(
+                        () -> new BusinessException(
+                                ErrorCode.GATHERING_NOT_FOUND
+                        )
+                );
+    }
+
     public List<GatheringSummaryResponse> searchByName(String keyword) {
 
         return gatheringRepository
@@ -222,7 +231,7 @@ public class GatheringService {
             int size
     ) {
 
-        getGathering(gatheringId);
+        getGatheringById(gatheringId);
 
         Pageable pageable = PageRequest.of(page, size);
 
@@ -251,15 +260,9 @@ public class GatheringService {
 
     @Transactional
     public LeaveGatheringResponse leave(Integer userId, Integer gatheringId) {
-        GatheringMemberId id = new GatheringMemberId(gatheringId, userId);
+        GatheringMember member = getMember(gatheringId, userId);
 
-        GatheringMember member =
-                memberRepository.findById(id)
-                        .orElseThrow(
-                                () -> new BusinessException(ErrorCode.GATHERING_MEMBER_NOT_FOUND)
-                        );
-
-        validateManagerLeave(member);
+        validateLastManagerRemoval(member, ErrorCode.MANAGER_CANNOT_LEAVE);
 
         memberRepository.delete(member);
 
@@ -273,7 +276,18 @@ public class GatheringService {
                 .build();
     }
 
-    private void validateManagerLeave(GatheringMember member) {
+    private GatheringMember getMember(Integer gatheringId, Integer userId) {
+        return memberRepository.findById(
+                        new GatheringMemberId(gatheringId, userId)
+                )
+                .orElseThrow(
+                        () -> new BusinessException(
+                                ErrorCode.GATHERING_MEMBER_NOT_FOUND
+                        )
+                );
+    }
+
+    private void validateLastManagerRemoval(GatheringMember member, ErrorCode errorCode) {
         if (member.getRole() != MemberRole.MANAGER) {
             return;
         }
@@ -286,7 +300,7 @@ public class GatheringService {
         long memberCount = memberRepository.countByGatheringId(member.getGathering().getId());
 
         if (managerCount == 1 && memberCount > 1) {
-            throw new BusinessException(ErrorCode.MANAGER_CANNOT_LEAVE);
+            throw new BusinessException(errorCode);
         }
     }
 
@@ -303,5 +317,40 @@ public class GatheringService {
 
             gathering.delete();
         }
+    }
+
+    @Transactional
+    public KickMemberResponse kickMember(
+            Integer managerId,
+            Integer gatheringId,
+            Integer targetUserId
+    ) {
+        Gathering gathering = getGatheringById(gatheringId);
+
+        validateManager(managerId, gathering);
+
+        GatheringMember targetMember = getMember(gatheringId, targetUserId);
+
+        validateKick(managerId, targetMember);
+
+        memberRepository.delete(targetMember);
+
+        deleteGatheringIfEmpty(gatheringId);
+
+        return KickMemberResponse.builder()
+                .gatheringId(gatheringId)
+                .userId(targetUserId)
+                .username(targetMember.getUser().getUsername())
+                .build();
+    }
+
+    private void validateKick(Integer managerId, GatheringMember targetMember) {
+        if (targetMember.getUser()
+                .getId()
+                .equals(managerId)) {
+            throw new BusinessException(ErrorCode.CANNOT_KICK_SELF);
+        }
+
+        validateLastManagerRemoval(targetMember, ErrorCode.LAST_MANAGER_CANNOT_BE_REMOVED);
     }
 }
