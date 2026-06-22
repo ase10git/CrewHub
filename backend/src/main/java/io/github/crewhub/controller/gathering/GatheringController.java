@@ -135,4 +135,14 @@ public class GatheringController {
                 gatheringService.getMembers(gatheringId, role, page, size)
         );
     }
+
+    @DeleteMapping("/{gatheringId}/members/leave")
+    public ApiResponse<LeaveGatheringResponse> leave(
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            @PathVariable Integer gatheringId
+    ) {
+        return ApiResponse.success(
+                gatheringService.leave(userDetails.getUserId(), gatheringId)
+        );
+    }
 }
