@@ -26,6 +26,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -410,4 +411,29 @@ public class DocumentService {
                     categoryMapRepository.save(map);
                 });
         }
+
+    @Transactional
+    public void delete(Integer userId, Integer documentId) {
+        Document document = findDocument(documentId);
+
+        validateManagerOrWriter(userId, document);
+
+        document.delete();
+    }
+
+    private void validateManagerOrWriter(Integer userId, Document document) {
+        boolean isWriter = Objects.equals(
+                userId,
+                document.getWriter().getId()
+        );
+
+        boolean isManager = Objects.equals(
+                userId,
+                document.getGathering().getManager().getId()
+        );
+
+        if (!isWriter && !isManager) {
+            throw new BusinessException(ErrorCode.ACCESS_DENIED);
+        }
+    }
 }
