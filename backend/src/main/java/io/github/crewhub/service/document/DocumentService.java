@@ -447,4 +447,15 @@ public class DocumentService {
                 .documentCount(documentCount)
                 .build();
     }
+
+    public MyDocumentCountResponse getMyDocumentCount(Integer userId) {
+        getUser(userId);
+
+        long documentCount = documentRepository.countByWriterId(userId);
+
+        return MyDocumentCountResponse.builder()
+                .userId(userId)
+                .documentCount(documentCount)
+                .build();
+    }
 }
