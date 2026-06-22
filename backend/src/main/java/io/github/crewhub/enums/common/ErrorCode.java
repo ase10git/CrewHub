@@ -35,6 +35,7 @@ public enum ErrorCode {
     GATHERING_MANAGER_ONLY(HttpStatus.FORBIDDEN, "모임 관리자만 가능합니다."),
     MANAGER_CANNOT_LEAVE(HttpStatus.FORBIDDEN, "모임 관리자는 탈퇴할 수 없습니다. 먼저 관리자 권한을 위임하세요."),
     GATHERING_MEMBER_ONLY(HttpStatus.FORBIDDEN, "모임 회원만 이용할 수 있습니다."),
+    WRITER_ONLY(HttpStatus.FORBIDDEN, "작성자만 이용할 수 있습니다."),
 
     INTERNAL_SERVER_ERROR(
             HttpStatus.INTERNAL_SERVER_ERROR,
