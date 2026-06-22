@@ -47,8 +47,21 @@ public interface GatheringRepository extends JpaRepository<Gathering, Integer> {
         and g.isDeleted = false
     """)
     Optional<Gathering> findActiveById(@Param("gatheringId") Integer gatheringId);
-    Page<Gathering> findByGatheringNameContainingIgnoreCase(String keyword, Pageable pageable);
-    Page<Gathering> findByCategoryId(Integer categoryId, Pageable pageable);
+    @Query("""
+        select g
+        from Gathering g
+        where g.isDeleted = false
+        and lower(g.gatheringName)
+        like lower(concat('%', :keyword, '%'))
+    """)
+    Page<Gathering> findByGatheringName( @Param("keyword") String keyword, Pageable pageable);
+    @Query("""
+        select g
+        from Gathering g
+        where g.isDeleted = false
+        and g.category.id = :categoryId
+    """)
+    Page<Gathering> findByCategoryId(@Param("categoryId") Integer categoryId, Pageable pageable);
     boolean existsByGatheringName(String gatheringName);
     boolean existsByGatheringNameAndIdNot(String gatheringName, Integer gatheringId);
 }
