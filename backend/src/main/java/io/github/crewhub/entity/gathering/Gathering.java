@@ -66,4 +66,8 @@ public class Gathering extends BaseEntity {
     public void delete() {
         this.isDeleted = true;
     }
+
+    public void changeManager(User manager) {
+        this.manager = manager;
+    }
 }

@@ -33,4 +33,8 @@ public class GatheringMember extends BaseEntity{
     @Enumerated(EnumType.STRING)
     @Column(name = "role", nullable = false, length = 20)
     private MemberRole role;
+
+    public void changeRole(MemberRole role) {
+        this.role = role;
+    }
 }

@@ -4,10 +4,7 @@ import io.github.crewhub.common.exception.BusinessException;
 import io.github.crewhub.dto.common.PageResponse;
 import io.github.crewhub.dto.gathering.request.CreateGatheringRequest;
 import io.github.crewhub.dto.gathering.request.UpdateGatheringRequest;
-import io.github.crewhub.dto.gathering.response.CreateGatheringResponse;
-import io.github.crewhub.dto.gathering.response.GatheringDetailResponse;
-import io.github.crewhub.dto.gathering.response.GatheringSummaryResponse;
-import io.github.crewhub.dto.gathering.response.UpdateGatheringResponse;
+import io.github.crewhub.dto.gathering.response.*;
 import io.github.crewhub.entity.gathering.Gathering;
 import io.github.crewhub.entity.gathering.GatheringCategory;
 import io.github.crewhub.entity.gathering.GatheringMember;
@@ -225,7 +222,7 @@ public class GatheringService {
                 .getId()
                 .equals(userId)) {
 
-            throw new BusinessException(ErrorCode.GATHERING_MANGER_ONLY);
+            throw new BusinessException(ErrorCode.GATHERING_MANAGER_ONLY);
         }
     }
 

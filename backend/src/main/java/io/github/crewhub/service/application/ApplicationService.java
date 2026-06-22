@@ -167,7 +167,7 @@ public class ApplicationService {
         if (!gathering.getManager()
                 .getId()
                 .equals(userId)) {
-            throw new BusinessException(ErrorCode.GATHERING_MANGER_ONLY);
+            throw new BusinessException(ErrorCode.GATHERING_MANAGER_ONLY);
         }
     }
 

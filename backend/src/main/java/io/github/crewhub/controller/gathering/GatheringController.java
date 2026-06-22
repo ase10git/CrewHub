@@ -5,13 +5,12 @@ import io.github.crewhub.dto.application.response.GatheringApplicationResponse;
 import io.github.crewhub.dto.common.PageResponse;
 import io.github.crewhub.dto.gathering.request.CreateGatheringRequest;
 import io.github.crewhub.dto.gathering.request.UpdateGatheringRequest;
-import io.github.crewhub.dto.gathering.response.CreateGatheringResponse;
-import io.github.crewhub.dto.gathering.response.GatheringDetailResponse;
-import io.github.crewhub.dto.gathering.response.GatheringSummaryResponse;
-import io.github.crewhub.dto.gathering.response.UpdateGatheringResponse;
+import io.github.crewhub.dto.gathering.response.*;
 import io.github.crewhub.enums.application.ApplicationStatus;
+import io.github.crewhub.enums.gathering.MemberRole;
 import io.github.crewhub.security.details.CustomUserDetails;
 import io.github.crewhub.service.application.ApplicationService;
+import io.github.crewhub.service.gathering.GatheringMemberService;
 import io.github.crewhub.service.gathering.GatheringService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -26,6 +25,7 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 public class GatheringController {
     private final GatheringService gatheringService;
+    private final GatheringMemberService gatheringMemberService;
     private final ApplicationService applicationService;
 
     @GetMapping
@@ -124,6 +124,92 @@ public class GatheringController {
                         page,
                         size
                 )
+        );
+    }
+
+    /**
+     * 모임 회원 관리
+     */
+
+    @GetMapping("/{gatheringId}/members")
+    public ApiResponse<PageResponse<GatheringMemberResponse>> getMembers(
+            @PathVariable Integer gatheringId,
+            @RequestParam(required = false) MemberRole role,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size
+    ) {
+        return ApiResponse.success(
+                gatheringMemberService.getMembers(gatheringId, role, page, size)
+        );
+    }
+
+    @DeleteMapping("/{gatheringId}/members/leave")
+    public ApiResponse<LeaveGatheringResponse> leave(
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            @PathVariable Integer gatheringId
+    ) {
+        return ApiResponse.success(
+                gatheringMemberService.leave(userDetails.getUserId(), gatheringId)
+        );
+    }
+
+    @DeleteMapping("/{gatheringId}/members/{userId}")
+    public ApiResponse<KickMemberResponse> kickMember(
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            @PathVariable Integer gatheringId,
+            @PathVariable Integer userId
+    ) {
+        return ApiResponse.success(
+                gatheringMemberService.kickMember(userDetails.getUserId(), gatheringId, userId)
+        );
+    }
+
+    @PatchMapping("/{gatheringId}/manager/{userId}")
+    public ApiResponse<TransferManagerResponse> transferManager(
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            @PathVariable Integer gatheringId,
+            @PathVariable Integer userId
+    ) {
+        return ApiResponse.success(
+                gatheringMemberService.transferManager(userDetails.getUserId(), gatheringId, userId)
+        );
+    }
+
+    @GetMapping("/my")
+    public ApiResponse<PageResponse<MyGatheringResponse>> getMyGatherings(
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size
+    ) {
+        return ApiResponse.success(
+                gatheringMemberService.getMyGatherings(userDetails.getUserId(), page, size)
+        );
+    }
+
+    @GetMapping("/{gatheringId}/members/count")
+    public ApiResponse<GatheringMemberCountResponse> getMemberCount(
+            @PathVariable Integer gatheringId
+    ) {
+        return ApiResponse.success(gatheringMemberService.getMemberCount(gatheringId));
+    }
+
+    @GetMapping("/{gatheringId}/members/me")
+    public ApiResponse<CheckMembershipResponse> checkMembership(
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            @PathVariable Integer gatheringId
+    ) {
+        return ApiResponse.success(
+                gatheringMemberService.checkMembership(userDetails.getUserId(), gatheringId)
+        );
+    }
+
+    @GetMapping("/{gatheringId}/members/me/manager")
+    public ApiResponse<CheckManagerResponse> checkManager(
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            @PathVariable Integer gatheringId
+    ) {
+        return ApiResponse.success(
+                gatheringMemberService.checkManager(userDetails.getUserId(), gatheringId)
         );
     }
 }
