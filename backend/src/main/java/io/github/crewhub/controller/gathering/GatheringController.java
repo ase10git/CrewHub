@@ -180,4 +180,11 @@ public class GatheringController {
                 gatheringMemberService.getMyGatherings(userDetails.getUserId(), page, size)
         );
     }
+
+    @GetMapping("/{gatheringId}/members/count")
+    public ApiResponse<GatheringMemberCountResponse> getMemberCount(
+            @PathVariable Integer gatheringId
+    ) {
+        return ApiResponse.success(gatheringMemberService.getMemberCount(gatheringId));
+    }
 }
