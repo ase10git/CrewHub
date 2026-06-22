@@ -190,4 +190,43 @@ public class DocumentService {
                 .updatedAt(document.getUpdatedAt())
                 .build();
     }
+
+    public PageResponse<DocumentSummaryResponse> searchByTitle(
+            Integer userId,
+            Integer gatheringId,
+            String keyword,
+            int page,
+            int size
+    ) {
+        Gathering gathering = findGathering(gatheringId);
+
+        validateMember(userId, gathering.getId());
+
+        Pageable pageable = PageRequest.of(page, size);
+
+        Page<Document> documents = documentRepository.findByTitle(gatheringId, keyword, pageable);
+
+        return new PageResponse<>(
+                documents.stream()
+                        .map(this::toSummaryResponse)
+                        .toList(),
+                documents.getNumber(),
+                documents.getSize(),
+                documents.getTotalElements(),
+                documents.getTotalPages(),
+                documents.hasNext()
+        );
+    }
+
+    private DocumentSummaryResponse toSummaryResponse(Document document) {
+        return DocumentSummaryResponse.builder()
+                .documentId(document.getId())
+                .title(document.getTitle())
+                .writerId(document.getWriter().getId())
+                .writerName(document.getWriter().getUsername())
+                .views(document.getViews())
+                .createdAt(document.getCreatedAt())
+                .updatedAt(document.getUpdatedAt())
+                .build();
+    }
 }
