@@ -39,9 +39,11 @@ public class Document extends BaseEntity {
     )
     private String content;
 
+    @Builder.Default
     @Column(name = "views", nullable = false)
     private Integer views = 0;
 
+    @Builder.Default
     @Column(name = "is_deleted", nullable = false)
     private Boolean isDeleted = false;
 }
