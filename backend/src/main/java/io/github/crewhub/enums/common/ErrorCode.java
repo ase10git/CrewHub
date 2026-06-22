@@ -24,6 +24,7 @@ public enum ErrorCode {
     DUPLICATE_GATHERING_MEMBER(HttpStatus.CONFLICT, "이미 가입한 모임입니다."),
     DUPLICATE_APPLICATION(HttpStatus.CONFLICT, "이미 지원한 모임입니다."),
     LAST_MANAGER_CANNOT_BE_REMOVED(HttpStatus.CONFLICT, "모임에 관리자가 최소 1명 이상 존재해야 합니다."),
+    ALREADY_MANAGER(HttpStatus.CONFLICT, "이미 관리자입니다."),
 
     APPLICATION_ALREADY_PROCESSED(HttpStatus.BAD_REQUEST, "이미 처리된 지원서입니다."),
     APPLICATION_NOT_CANCELLED(HttpStatus.BAD_REQUEST, "취소된 지원서만 복구할 수 있습니다."),
