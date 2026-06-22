@@ -1,6 +1,7 @@
 package io.github.crewhub.service.gathering;
 
 import io.github.crewhub.common.exception.BusinessException;
+import io.github.crewhub.dto.common.PageResponse;
 import io.github.crewhub.dto.gathering.request.CreateGatheringRequest;
 import io.github.crewhub.dto.gathering.request.UpdateGatheringRequest;
 import io.github.crewhub.dto.gathering.response.CreateGatheringResponse;
@@ -19,10 +20,11 @@ import io.github.crewhub.repository.gathering.GatheringMemberRepository;
 import io.github.crewhub.repository.gathering.GatheringRepository;
 import io.github.crewhub.repository.user.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.List;
 
 /**
  * 모임 서비스
@@ -36,12 +38,22 @@ public class GatheringService {
     private final GatheringMemberRepository memberRepository;
     private final UserRepository userRepository;
 
-    public List<GatheringSummaryResponse> getGatherings() {
+    public PageResponse<GatheringSummaryResponse> getGatherings(int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
 
-        return gatheringRepository.findAllActive()
-                .stream()
-                .map(this::toSummaryResponse)
-                .toList();
+        Page<Gathering> gatherings =
+                gatheringRepository.findAllActive(pageable);
+
+        return new PageResponse<>(
+                gatherings.stream()
+                        .map(this::toSummaryResponse)
+                        .toList(),
+                gatherings.getNumber(),
+                gatherings.getSize(),
+                gatherings.getTotalElements(),
+                gatherings.getTotalPages(),
+                gatherings.hasNext()
+        );
     }
 
     public GatheringDetailResponse getGathering(Integer gatheringId) {
@@ -63,22 +75,40 @@ public class GatheringService {
                 .build();
     }
 
-    public List<GatheringSummaryResponse> searchByName(String keyword) {
+    public PageResponse<GatheringSummaryResponse> searchByName(String keyword, int page, int size) {
 
-        return gatheringRepository
-                .findByGatheringNameContainingIgnoreCase(keyword)
-                .stream()
-                .map(this::toSummaryResponse)
-                .toList();
+        Pageable pageable = PageRequest.of(page, size);
+
+        Page<Gathering> gatherings = gatheringRepository.findByGatheringName(keyword, pageable);
+
+        return new PageResponse<>(
+                gatherings.stream()
+                        .map(this::toSummaryResponse)
+                        .toList(),
+                gatherings.getNumber(),
+                gatherings.getSize(),
+                gatherings.getTotalElements(),
+                gatherings.getTotalPages(),
+                gatherings.hasNext()
+        );
     }
 
-    public List<GatheringSummaryResponse> searchByCategory(Integer categoryId) {
+    public PageResponse<GatheringSummaryResponse> searchByCategory(Integer categoryId, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
 
-        return gatheringRepository
-                .findByCategoryId(categoryId)
-                .stream()
-                .map(this::toSummaryResponse)
-                .toList();
+        Page<Gathering> gatherings = gatheringRepository
+                        .findByCategoryId(categoryId, pageable);
+
+        return new PageResponse<>(
+                gatherings.stream()
+                        .map(this::toSummaryResponse)
+                        .toList(),
+                gatherings.getNumber(),
+                gatherings.getSize(),
+                gatherings.getTotalElements(),
+                gatherings.getTotalPages(),
+                gatherings.hasNext()
+        );
     }
 
     private GatheringSummaryResponse toSummaryResponse(Gathering gathering) {
