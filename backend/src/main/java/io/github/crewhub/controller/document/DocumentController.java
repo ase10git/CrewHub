@@ -141,4 +141,11 @@ public class DocumentController {
     ) {
         return ApiResponse.success(documentService.getDocumentCount(gatheringId));
     }
+
+    @GetMapping("/document/my/count")
+    public ApiResponse<MyDocumentCountResponse> getMyDocumentCount(
+            @AuthenticationPrincipal CustomUserDetails userDetails
+    ) {
+        return ApiResponse.success(documentService.getMyDocumentCount(userDetails.getUserId()));
+    }
 }
