@@ -136,7 +136,7 @@ public class DocumentController {
     }
 
     @GetMapping("/gathering/{gatheringId}/document/count")
-    public ApiResponse<GatheringDocumentCountResponse> getMemberCount(
+    public ApiResponse<GatheringDocumentCountResponse> getDocumentCount(
             @PathVariable Integer gatheringId
     ) {
         return ApiResponse.success(documentService.getDocumentCount(gatheringId));
