@@ -145,4 +145,15 @@ public class GatheringController {
                 gatheringService.leave(userDetails.getUserId(), gatheringId)
         );
     }
+
+    @DeleteMapping("/{gatheringId}/members/{userId}")
+    public ApiResponse<KickMemberResponse> kickMember(
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            @PathVariable Integer gatheringId,
+            @PathVariable Integer userId
+    ) {
+        return ApiResponse.success(
+                gatheringService.kickMember(userDetails.getUserId(), gatheringId, userId)
+        );
+    }
 }
