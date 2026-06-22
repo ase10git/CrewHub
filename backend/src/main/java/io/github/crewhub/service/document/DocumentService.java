@@ -3,10 +3,7 @@ package io.github.crewhub.service.document;
 import io.github.crewhub.common.exception.BusinessException;
 import io.github.crewhub.dto.common.PageResponse;
 import io.github.crewhub.dto.document.request.CreateDocumentRequest;
-import io.github.crewhub.dto.document.response.CategoryResponse;
-import io.github.crewhub.dto.document.response.CreateDocumentResponse;
-import io.github.crewhub.dto.document.response.DocumentDetailResponse;
-import io.github.crewhub.dto.document.response.DocumentSummaryResponse;
+import io.github.crewhub.dto.document.response.*;
 import io.github.crewhub.entity.document.Document;
 import io.github.crewhub.entity.document.DocumentCategory;
 import io.github.crewhub.entity.document.DocumentCategoryMap;
@@ -281,5 +278,36 @@ public class DocumentService {
                 .findById(categoryId).orElseThrow(
                         () -> new BusinessException(ErrorCode.CATEGORY_NOT_FOUND)
                 );
+    }
+
+    public PageResponse<MyDocumentResponse> getMyDocuments(
+            Integer userId,
+            int page,
+            int size
+    ) {
+        Pageable pageable = PageRequest.of(page, size);
+
+        Page<Document> documents = documentRepository.findByWriterId(userId, pageable);
+
+        return new PageResponse<>(
+                documents.stream()
+                        .map(document -> MyDocumentResponse.builder()
+                                .documentId(document.getId())
+                                .gatheringId(document.getGathering().getId())
+                                .gatheringName(document.getGathering().getGatheringName())
+                                .title(document.getTitle())
+                                .views(document.getViews())
+                                .isDeleted(document.getIsDeleted())
+                                .createdAt(document.getCreatedAt())
+                                .updatedAt(document.getUpdatedAt())
+                                .build()
+                        )
+                        .toList(),
+                documents.getNumber(),
+                documents.getSize(),
+                documents.getTotalElements(),
+                documents.getTotalPages(),
+                documents.hasNext()
+        );
     }
 }
