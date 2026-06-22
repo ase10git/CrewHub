@@ -197,4 +197,14 @@ public class GatheringController {
                 gatheringMemberService.checkMembership(userDetails.getUserId(), gatheringId)
         );
     }
+
+    @GetMapping("/{gatheringId}/members/me/manager")
+    public ApiResponse<CheckManagerResponse> checkManager(
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            @PathVariable Integer gatheringId
+    ) {
+        return ApiResponse.success(
+                gatheringMemberService.checkManager(userDetails.getUserId(), gatheringId)
+        );
+    }
 }
