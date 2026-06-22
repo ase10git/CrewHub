@@ -219,4 +219,38 @@ public class GatheringMemberService {
             throw new BusinessException(ErrorCode.ALREADY_MANAGER);
         }
     }
+
+    public PageResponse<MyGatheringResponse> getMyGatherings(
+            Integer userId,
+            int page,
+            int size
+    ) {
+        Pageable pageable = PageRequest.of(page, size);
+
+        Page<GatheringMember> gatherings =
+                memberRepository.findMyGatherings(userId, pageable);
+
+        return new PageResponse<>(
+                gatherings.stream()
+                        .map(member ->
+                                MyGatheringResponse.builder()
+                                        .gatheringId(member.getGathering().getId())
+                                        .gatheringName(member.getGathering().getGatheringName())
+                                        .categoryLabel(
+                                                member.getGathering()
+                                                        .getCategory()
+                                                        .getLabel()
+                                        )
+                                        .role(member.getRole())
+                                        .joinedAt(member.getCreatedAt())
+                                        .build()
+                        )
+                        .toList(),
+                gatherings.getNumber(),
+                gatherings.getSize(),
+                gatherings.getTotalElements(),
+                gatherings.getTotalPages(),
+                gatherings.hasNext()
+        );
+    }
 }
