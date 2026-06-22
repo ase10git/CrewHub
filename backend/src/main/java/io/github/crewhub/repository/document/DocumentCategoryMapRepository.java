@@ -23,6 +23,7 @@ public interface DocumentCategoryMapRepository extends JpaRepository<DocumentCat
         where dcm.document.id = :documentId
     """)
     List<DocumentCategoryMap> findDocumentCategory(@Param("documentId") Integer documentId);
+    List<DocumentCategoryMap> findAllByDocumentId(Integer documentId);
     @Query("""
         select dcm
         from DocumentCategoryMap dcm
