@@ -436,4 +436,15 @@ public class DocumentService {
             throw new BusinessException(ErrorCode.ACCESS_DENIED);
         }
     }
+
+    public GatheringDocumentCountResponse getDocumentCount(Integer gatheringId) {
+        findGathering(gatheringId);
+
+        long documentCount = documentRepository.countByGatheringId(gatheringId);
+
+        return GatheringDocumentCountResponse.builder()
+                .gatheringId(gatheringId)
+                .documentCount(documentCount)
+                .build();
+    }
 }
