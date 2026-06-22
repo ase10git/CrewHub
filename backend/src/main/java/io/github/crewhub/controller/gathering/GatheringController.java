@@ -158,4 +158,15 @@ public class GatheringController {
                 gatheringMemberService.kickMember(userDetails.getUserId(), gatheringId, userId)
         );
     }
+
+    @PatchMapping("/{gatheringId}/manager/{userId}")
+    public ApiResponse<TransferManagerResponse> transferManager(
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            @PathVariable Integer gatheringId,
+            @PathVariable Integer userId
+    ) {
+        return ApiResponse.success(
+                gatheringMemberService.transferManager(userDetails.getUserId(), gatheringId, userId)
+        );
+    }
 }
