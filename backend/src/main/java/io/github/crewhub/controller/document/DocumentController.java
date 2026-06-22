@@ -6,6 +6,7 @@ import io.github.crewhub.dto.document.request.CreateDocumentRequest;
 import io.github.crewhub.dto.document.response.CreateDocumentResponse;
 import io.github.crewhub.dto.document.response.DocumentDetailResponse;
 import io.github.crewhub.dto.document.response.DocumentSummaryResponse;
+import io.github.crewhub.dto.document.response.MyDocumentResponse;
 import io.github.crewhub.security.details.CustomUserDetails;
 import io.github.crewhub.service.document.DocumentService;
 import jakarta.validation.Valid;
@@ -95,6 +96,17 @@ public class DocumentController {
                         page,
                         size
                 )
+        );
+    }
+
+    @GetMapping("/document/my")
+    public ApiResponse<PageResponse<MyDocumentResponse>> getMyDocuments(
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size
+    ) {
+        return ApiResponse.success(
+                documentService.getMyDocuments(userDetails.getUserId(), page, size)
         );
     }
 }
