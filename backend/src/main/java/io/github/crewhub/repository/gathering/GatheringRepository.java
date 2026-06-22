@@ -1,12 +1,13 @@
 package io.github.crewhub.repository.gathering;
 
 import io.github.crewhub.entity.gathering.Gathering;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
-import java.util.List;
 import java.util.Optional;
 
 /**
@@ -14,13 +15,20 @@ import java.util.Optional;
  */
 @Repository
 public interface GatheringRepository extends JpaRepository<Gathering, Integer> {
-    @Query("""
+    @Query(
+    value = """
         select g
         from Gathering g
         join fetch g.category
         join fetch g.manager
-        where g.id = :gatheringId
-    """)
+        where g.isDeleted = false
+    """,
+    countQuery = """
+        select count(g)
+        from Gathering g
+        where g.isDeleted = false
+    """
+    )
     Optional<Gathering> findDetailById(@Param("gatheringId") Integer gatheringId);
     @Query("""
         select g
@@ -29,7 +37,7 @@ public interface GatheringRepository extends JpaRepository<Gathering, Integer> {
         join fetch g.manager
         where g.isDeleted = false
     """)
-    List<Gathering> findAllActive();
+    Page<Gathering> findAllActive(Pageable pageable);
     @Query("""
         select g
         from Gathering g
@@ -39,8 +47,8 @@ public interface GatheringRepository extends JpaRepository<Gathering, Integer> {
         and g.isDeleted = false
     """)
     Optional<Gathering> findActiveById(@Param("gatheringId") Integer gatheringId);
-    List<Gathering> findByGatheringNameContainingIgnoreCase(String keyword);
-    List<Gathering> findByCategoryId(Integer categoryId);
+    Page<Gathering> findByGatheringNameContainingIgnoreCase(String keyword, Pageable pageable);
+    Page<Gathering> findByCategoryId(Integer categoryId, Pageable pageable);
     boolean existsByGatheringName(String gatheringName);
     boolean existsByGatheringNameAndIdNot(String gatheringName, Integer gatheringId);
 }
