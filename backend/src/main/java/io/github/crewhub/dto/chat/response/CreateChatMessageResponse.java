@@ -13,7 +13,7 @@ public record CreateChatMessageResponse(
         Integer roomId,
         Integer senderId,
         String senderName,
-        String message,
+        String content,
         LocalDateTime createdAt,
         LocalDateTime updatedAt
 ) {
