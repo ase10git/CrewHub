@@ -1,12 +1,18 @@
 package io.github.crewhub.service.chat;
 
 import io.github.crewhub.common.exception.BusinessException;
+import io.github.crewhub.dto.chat.request.CreateChatMessageRequest;
 import io.github.crewhub.dto.chat.response.ChatRoomResponse;
+import io.github.crewhub.dto.chat.response.CreateChatMessageResponse;
+import io.github.crewhub.entity.chat.ChatMessage;
 import io.github.crewhub.entity.chat.ChatRoom;
+import io.github.crewhub.entity.gathering.Gathering;
+import io.github.crewhub.entity.user.User;
 import io.github.crewhub.enums.common.ErrorCode;
 import io.github.crewhub.repository.chat.ChatMessageRepository;
 import io.github.crewhub.repository.chat.ChatRoomRepository;
 import io.github.crewhub.repository.gathering.GatheringMemberRepository;
+import io.github.crewhub.repository.user.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -21,12 +27,15 @@ public class ChatService {
     private final ChatRoomRepository chatRoomRepository;
     private final ChatMessageRepository chatMessageRepository;
     private final GatheringMemberRepository memberRepository;
+    private final UserRepository userRepository;
 
     public ChatRoomResponse getRoom(Integer userId, Integer roomId) {
         ChatRoom room = chatRoomRepository.findById(roomId)
                 .orElseThrow(
                         () -> new BusinessException(ErrorCode.CHATROOM_NOT_FOUND)
                 );
+
+        validateActiveGathering(room.getGathering());
 
         validateMember(userId, room.getGathering().getId());
 
@@ -51,5 +60,51 @@ public class ChatService {
                 .orElseThrow(
                         () -> new BusinessException(ErrorCode.CHATROOM_NOT_FOUND)
                 );
+    }
+
+    @Transactional
+    public CreateChatMessageResponse sendMessage(
+            Integer userId,
+            Integer roomId,
+            CreateChatMessageRequest request
+    ) {
+        User user = getUser(userId);
+
+        ChatRoom room = findRoom(roomId);
+
+        validateActiveGathering(room.getGathering());
+
+        validateMember(userId, room.getGathering().getId());
+
+        ChatMessage message = ChatMessage.builder()
+                .chatRoom(room)
+                .user(user)
+                .content(request.content())
+                .build();
+
+        ChatMessage saved = chatMessageRepository.save(message);
+
+        return CreateChatMessageResponse.builder()
+                .messageId(saved.getId())
+                .roomId(roomId)
+                .senderId(user.getId())
+                .senderName(user.getUsername())
+                .message(saved.getContent())
+                .createdAt(saved.getCreatedAt())
+                .updatedAt(saved.getUpdatedAt())
+                .build();
+    }
+
+    private User getUser(Integer userId) {
+        return userRepository.findById(userId).orElseThrow(
+                () -> new BusinessException(ErrorCode.USER_NOT_FOUND)
+        );
+    }
+
+    private void validateActiveGathering(Gathering gathering) {
+        if (Boolean.TRUE.equals(gathering.getIsDeleted())) {
+            throw new BusinessException(ErrorCode.GATHERING_NOT_FOUND);
+        }
+
     }
 }
