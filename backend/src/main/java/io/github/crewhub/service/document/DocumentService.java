@@ -199,6 +199,10 @@ public class DocumentService {
             int page,
             int size
     ) {
+        if (keyword == null || keyword.isBlank()) {
+            throw new BusinessException(ErrorCode.INVALID_KEYWORD);
+        }
+
         Gathering gathering = findGathering(gatheringId);
 
         validateMember(userId, gathering.getId());

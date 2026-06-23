@@ -16,7 +16,8 @@ public enum ErrorCode {
     CATEGORY_NOT_FOUND(HttpStatus.NOT_FOUND, "카테고리를 찾을 수 없습니다."),
     GATHERING_NOT_FOUND(HttpStatus.NOT_FOUND, "모임을 찾을 수 없습니다."),
     APPLICATION_NOT_FOUND(HttpStatus.NOT_FOUND, "지원서를 찾을 수 없습니다."),
-    GATHERING_MEMBER_NOT_FOUND(HttpStatus.FORBIDDEN, "모임 회원을 찾을 수 없습니다."),
+    GATHERING_MEMBER_NOT_FOUND(HttpStatus.NOT_FOUND, "모임 회원을 찾을 수 없습니다."),
+    INVALID_KEYWORD(HttpStatus.NOT_FOUND, "키워드가 존재하지 않습니다."),
 
     DUPLICATE_EMAIL(HttpStatus.CONFLICT, "이미 사용중인 이메일입니다."),
     DUPLICATE_USERNAME(HttpStatus.CONFLICT, "이미 사용중인 사용자명입니다."),
