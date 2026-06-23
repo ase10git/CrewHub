@@ -2,10 +2,8 @@ package io.github.crewhub.controller.chat;
 
 
 import io.github.crewhub.common.response.ApiResponse;
-import io.github.crewhub.dto.chat.request.CreateChatMessageRequest;
 import io.github.crewhub.dto.chat.response.ChatMessageResponse;
 import io.github.crewhub.dto.chat.response.ChatRoomResponse;
-import io.github.crewhub.dto.chat.response.CreateChatMessageResponse;
 import io.github.crewhub.dto.common.PageResponse;
 import io.github.crewhub.security.details.CustomUserDetails;
 import io.github.crewhub.service.chat.ChatService;
@@ -29,17 +27,6 @@ public class ChatController {
     ) {
         return ApiResponse.success(
                 chatService.getRoom(userDetails.getUserId(), roomId)
-        );
-    }
-
-    @PostMapping("/room/{roomId}/message")
-    public ApiResponse<CreateChatMessageResponse> sendMessage(
-            @AuthenticationPrincipal CustomUserDetails userDetails,
-            @PathVariable Integer roomId,
-            @RequestBody CreateChatMessageRequest request
-            ) {
-        return ApiResponse.success(
-                chatService.sendMessage(userDetails.getUserId(), roomId, request)
         );
     }
 
