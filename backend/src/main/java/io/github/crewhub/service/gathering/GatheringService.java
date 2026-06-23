@@ -72,7 +72,14 @@ public class GatheringService {
                 .build();
     }
 
-    public PageResponse<GatheringSummaryResponse> searchByName(String keyword, int page, int size) {
+    public PageResponse<GatheringSummaryResponse> searchByName(
+            String keyword,
+            int page,
+            int size
+    ) {
+        if (keyword == null || keyword.isBlank()) {
+            throw new BusinessException(ErrorCode.INVALID_KEYWORD);
+        }
 
         Pageable pageable = PageRequest.of(page, size);
 
