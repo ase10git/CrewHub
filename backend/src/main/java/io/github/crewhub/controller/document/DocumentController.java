@@ -21,7 +21,7 @@ import org.springframework.web.bind.annotation.*;
 public class DocumentController {
     private final DocumentService documentService;
 
-    @PostMapping("/gathering/document")
+    @PostMapping("/document")
     public ApiResponse<CreateDocumentResponse> create(
             @AuthenticationPrincipal CustomUserDetails userDetails,
             @Valid @RequestBody CreateDocumentRequest request
