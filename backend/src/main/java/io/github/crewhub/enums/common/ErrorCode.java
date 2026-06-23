@@ -16,7 +16,8 @@ public enum ErrorCode {
     CATEGORY_NOT_FOUND(HttpStatus.NOT_FOUND, "카테고리를 찾을 수 없습니다."),
     GATHERING_NOT_FOUND(HttpStatus.NOT_FOUND, "모임을 찾을 수 없습니다."),
     APPLICATION_NOT_FOUND(HttpStatus.NOT_FOUND, "지원서를 찾을 수 없습니다."),
-    GATHERING_MEMBER_NOT_FOUND(HttpStatus.FORBIDDEN, "모임 회원을 찾을 수 없습니다."),
+    GATHERING_MEMBER_NOT_FOUND(HttpStatus.NOT_FOUND, "모임 회원을 찾을 수 없습니다."),
+    INVALID_KEYWORD(HttpStatus.NOT_FOUND, "키워드가 존재하지 않습니다."),
 
     DUPLICATE_EMAIL(HttpStatus.CONFLICT, "이미 사용중인 이메일입니다."),
     DUPLICATE_USERNAME(HttpStatus.CONFLICT, "이미 사용중인 사용자명입니다."),
@@ -34,6 +35,8 @@ public enum ErrorCode {
     ACCESS_DENIED(HttpStatus.FORBIDDEN, "접근 권한이 없습니다."),
     GATHERING_MANAGER_ONLY(HttpStatus.FORBIDDEN, "모임 관리자만 가능합니다."),
     MANAGER_CANNOT_LEAVE(HttpStatus.FORBIDDEN, "모임 관리자는 탈퇴할 수 없습니다. 먼저 관리자 권한을 위임하세요."),
+    GATHERING_MEMBER_ONLY(HttpStatus.FORBIDDEN, "모임 회원만 이용할 수 있습니다."),
+    WRITER_ONLY(HttpStatus.FORBIDDEN, "작성자만 이용할 수 있습니다."),
 
     INTERNAL_SERVER_ERROR(
             HttpStatus.INTERNAL_SERVER_ERROR,

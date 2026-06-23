@@ -13,6 +13,8 @@ import lombok.*;
 @Table(name = "documents")
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@AllArgsConstructor(access = AccessLevel.PRIVATE)
+@Builder
 public class Document extends BaseEntity {
 
     @Id
@@ -37,9 +39,27 @@ public class Document extends BaseEntity {
     )
     private String content;
 
+    @Builder.Default
     @Column(name = "views", nullable = false)
     private Integer views = 0;
 
+    @Builder.Default
     @Column(name = "is_deleted", nullable = false)
     private Boolean isDeleted = false;
+
+    public void updateDocument(
+            String title,
+            String content
+    ) {
+        this.title = title;
+        this.content = content;
+    }
+
+    public void delete() {
+        this.isDeleted = true;
+    }
+
+    public void increaseViews() {
+        this.views++;
+    }
 }
