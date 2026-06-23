@@ -156,6 +156,7 @@ public class DocumentService {
         );
     }
 
+    @Transactional
     public DocumentDetailResponse getDocument(Integer userId, Integer documentId) {
         Document document =
                 documentRepository.findDetailById(documentId)
@@ -175,6 +176,8 @@ public class DocumentService {
                                         .label(categoryMap.getCategory().getLabel())
                                         .build())
                         .toList();
+
+        document.increaseViews();
 
         return DocumentDetailResponse.builder()
                 .documentId(documentId)

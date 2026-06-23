@@ -58,4 +58,8 @@ public class Document extends BaseEntity {
     public void delete() {
         this.isDeleted = true;
     }
+
+    public void increaseViews() {
+        this.views++;
+    }
 }
