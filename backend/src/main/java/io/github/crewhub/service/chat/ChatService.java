@@ -2,8 +2,10 @@ package io.github.crewhub.service.chat;
 
 import io.github.crewhub.common.exception.BusinessException;
 import io.github.crewhub.dto.chat.request.CreateChatMessageRequest;
+import io.github.crewhub.dto.chat.response.ChatMessageResponse;
 import io.github.crewhub.dto.chat.response.ChatRoomResponse;
 import io.github.crewhub.dto.chat.response.CreateChatMessageResponse;
+import io.github.crewhub.dto.common.PageResponse;
 import io.github.crewhub.entity.chat.ChatMessage;
 import io.github.crewhub.entity.chat.ChatRoom;
 import io.github.crewhub.entity.gathering.Gathering;
@@ -14,6 +16,9 @@ import io.github.crewhub.repository.chat.ChatRoomRepository;
 import io.github.crewhub.repository.gathering.GatheringMemberRepository;
 import io.github.crewhub.repository.user.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -105,6 +110,44 @@ public class ChatService {
         if (Boolean.TRUE.equals(gathering.getIsDeleted())) {
             throw new BusinessException(ErrorCode.GATHERING_NOT_FOUND);
         }
+    }
 
+    public PageResponse<ChatMessageResponse> getMessages(
+            Integer userId,
+            Integer roomId,
+            int page,
+            int size
+    ) {
+        ChatRoom room = findRoom(roomId);
+
+        validateActiveGathering(room.getGathering());
+
+        validateMember(userId, room.getGathering().getId());
+
+        Pageable pageable = PageRequest.of(page, size);
+
+        Page<ChatMessage> messages = chatMessageRepository.findMessages(
+                roomId,
+                pageable
+        );
+
+        return new PageResponse<>(
+                messages.stream()
+                        .map(message ->
+                                ChatMessageResponse.builder()
+                                        .messageId(message.getId())
+                                        .senderId(message.getUser().getId())
+                                        .senderName(message.getUser().getUsername())
+                                        .content(message.getContent())
+                                        .createdAt(message.getCreatedAt())
+                                        .build()
+                        )
+                        .toList(),
+                messages.getNumber(),
+                messages.getSize(),
+                messages.getTotalElements(),
+                messages.getTotalPages(),
+                messages.hasNext()
+        );
     }
 }
