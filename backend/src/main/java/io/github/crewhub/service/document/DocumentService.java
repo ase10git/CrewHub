@@ -440,7 +440,7 @@ public class DocumentService {
     public GatheringDocumentCountResponse getDocumentCount(Integer gatheringId) {
         findGathering(gatheringId);
 
-        long documentCount = documentRepository.countByGatheringId(gatheringId);
+        long documentCount = documentRepository.countByGatheringIdAndIsDeletedFalse(gatheringId);
 
         return GatheringDocumentCountResponse.builder()
                 .gatheringId(gatheringId)
@@ -451,7 +451,7 @@ public class DocumentService {
     public MyDocumentCountResponse getMyDocumentCount(Integer userId) {
         getUser(userId);
 
-        long documentCount = documentRepository.countByWriterId(userId);
+        long documentCount = documentRepository.countByWriterIdAndIsDeletedFalse(userId);
 
         return MyDocumentCountResponse.builder()
                 .userId(userId)
