@@ -35,6 +35,7 @@ public class ChatMessage extends BaseEntity {
     )
     private String content;
 
+    @Builder.Default
     @Column(name = "is_deleted", nullable = false)
     private Boolean isDeleted = false;
 }
