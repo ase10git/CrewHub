@@ -5,6 +5,7 @@ import io.github.crewhub.dto.common.PageResponse;
 import io.github.crewhub.dto.gathering.request.CreateGatheringRequest;
 import io.github.crewhub.dto.gathering.request.UpdateGatheringRequest;
 import io.github.crewhub.dto.gathering.response.*;
+import io.github.crewhub.entity.chat.ChatRoom;
 import io.github.crewhub.entity.gathering.Gathering;
 import io.github.crewhub.entity.gathering.GatheringCategory;
 import io.github.crewhub.entity.gathering.GatheringMember;
@@ -12,6 +13,7 @@ import io.github.crewhub.entity.gathering.GatheringMemberId;
 import io.github.crewhub.entity.user.User;
 import io.github.crewhub.enums.common.ErrorCode;
 import io.github.crewhub.enums.gathering.MemberRole;
+import io.github.crewhub.repository.chat.ChatRoomRepository;
 import io.github.crewhub.repository.gathering.GatheringCategoryRepository;
 import io.github.crewhub.repository.gathering.GatheringMemberRepository;
 import io.github.crewhub.repository.gathering.GatheringRepository;
@@ -34,6 +36,7 @@ public class GatheringService {
     private final GatheringCategoryRepository categoryRepository;
     private final GatheringMemberRepository memberRepository;
     private final UserRepository userRepository;
+    private final ChatRoomRepository chatRoomRepository;
 
     public PageResponse<GatheringSummaryResponse> getGatherings(int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
@@ -150,6 +153,8 @@ public class GatheringService {
 
         registerManager(savedGathering, manager);
 
+        createChatRoom(savedGathering);
+
         return CreateGatheringResponse.builder()
                 .gatheringId(savedGathering.getId())
                 .gatheringName(savedGathering.getGatheringName())
@@ -180,6 +185,14 @@ public class GatheringService {
                 .build();
 
         memberRepository.save(member);
+    }
+
+    private void createChatRoom(Gathering gathering) {
+        ChatRoom chatRoom = ChatRoom.builder()
+                .gathering(gathering)
+                .build();
+
+        chatRoomRepository.save(chatRoom);
     }
 
     @Transactional
