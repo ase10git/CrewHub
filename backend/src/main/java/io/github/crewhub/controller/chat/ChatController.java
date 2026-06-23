@@ -3,8 +3,10 @@ package io.github.crewhub.controller.chat;
 
 import io.github.crewhub.common.response.ApiResponse;
 import io.github.crewhub.dto.chat.request.CreateChatMessageRequest;
+import io.github.crewhub.dto.chat.response.ChatMessageResponse;
 import io.github.crewhub.dto.chat.response.ChatRoomResponse;
 import io.github.crewhub.dto.chat.response.CreateChatMessageResponse;
+import io.github.crewhub.dto.common.PageResponse;
 import io.github.crewhub.security.details.CustomUserDetails;
 import io.github.crewhub.service.chat.ChatService;
 import lombok.RequiredArgsConstructor;
@@ -38,6 +40,23 @@ public class ChatController {
             ) {
         return ApiResponse.success(
                 chatService.sendMessage(userDetails.getUserId(), roomId, request)
+        );
+    }
+
+    @GetMapping("/room/{roomId}/messages")
+    public ApiResponse<PageResponse<ChatMessageResponse>> getMessages(
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            @PathVariable Integer roomId,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "15") int size
+    ) {
+        return ApiResponse.success(
+                chatService.getMessages(
+                        userDetails.getUserId(),
+                        roomId,
+                        page,
+                        size
+                )
         );
     }
 }
