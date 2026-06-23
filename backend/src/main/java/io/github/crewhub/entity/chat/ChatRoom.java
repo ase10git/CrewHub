@@ -12,6 +12,8 @@ import lombok.*;
 @Table(name = "chat_rooms")
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@AllArgsConstructor(access = AccessLevel.PRIVATE)
+@Builder
 public class ChatRoom extends BaseEntity {
 
     @Id
