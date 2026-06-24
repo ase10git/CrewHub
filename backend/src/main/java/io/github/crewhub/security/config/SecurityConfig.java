@@ -56,8 +56,8 @@ public class SecurityConfig {
 
                                 "/v1/api-docs/**",
 
-                                "/api/gatherings",
-                                "/api/gatherings/*",
+                                "/api/gathering",
+                                "/api/gathering/*",
 
                                 "/ws/**",
                                 "/ws"
