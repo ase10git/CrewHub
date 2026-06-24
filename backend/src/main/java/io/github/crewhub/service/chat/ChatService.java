@@ -19,6 +19,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -33,6 +34,8 @@ public class ChatService {
     private final ChatMessageRepository chatMessageRepository;
     private final GatheringMemberRepository memberRepository;
     private final UserRepository userRepository;
+
+    private final SimpMessagingTemplate messagingTemplate;
 
     public ChatRoomResponse getRoom(Integer userId, Integer roomId) {
         ChatRoom room = chatRoomRepository.findById(roomId)
@@ -67,15 +70,22 @@ public class ChatService {
                 );
     }
 
+    private ChatRoom findRoomByGathering(Integer gatheringId) {
+        return chatRoomRepository.findByGatheringId(gatheringId)
+                .orElseThrow(
+                        () -> new BusinessException(ErrorCode.CHATROOM_NOT_FOUND)
+                );
+    }
+
     @Transactional
-    public CreateChatMessageResponse sendMessage(
+    public CreateChatMessageResponse sendSocketMessage(
             Integer userId,
-            Integer roomId,
+            Integer gatheringId,
             CreateChatMessageRequest request
     ) {
         User user = getUser(userId);
 
-        ChatRoom room = findRoom(roomId);
+        ChatRoom room = findRoomByGathering(gatheringId);
 
         validateActiveGathering(room.getGathering());
 
@@ -89,15 +99,22 @@ public class ChatService {
 
         ChatMessage saved = chatMessageRepository.save(message);
 
-        return CreateChatMessageResponse.builder()
-                .messageId(saved.getId())
-                .roomId(roomId)
-                .senderId(user.getId())
-                .senderName(user.getUsername())
-                .message(saved.getContent())
-                .createdAt(saved.getCreatedAt())
-                .updatedAt(saved.getUpdatedAt())
-                .build();
+        CreateChatMessageResponse chatMessageSocketResponse =
+                CreateChatMessageResponse.builder()
+                        .messageId(saved.getId())
+                        .roomId(room.getId())
+                        .senderId(user.getId())
+                        .senderName(user.getUsername())
+                        .content(saved.getContent())
+                        .createdAt(saved.getCreatedAt())
+                        .build();
+
+        messagingTemplate.convertAndSend(
+                "/topic/chat/" + gatheringId,
+                chatMessageSocketResponse
+        );
+
+        return chatMessageSocketResponse;
     }
 
     private User getUser(Integer userId) {
@@ -150,4 +167,5 @@ public class ChatService {
                 messages.hasNext()
         );
     }
+
 }
