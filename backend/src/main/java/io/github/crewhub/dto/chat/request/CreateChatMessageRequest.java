@@ -1,6 +1,7 @@
 package io.github.crewhub.dto.chat.request;
 
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 import lombok.Builder;
 
 /**
@@ -8,6 +9,6 @@ import lombok.Builder;
  */
 @Builder
 public record CreateChatMessageRequest(
-        @NotBlank String content
+        @NotBlank @Size(max = 1000) String content
 ) {
 }
