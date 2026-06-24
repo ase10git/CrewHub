@@ -29,7 +29,6 @@ public class JwtProvider {
     public String generateToken(
             CustomUserDetails userDetails
     ) {
-
         Map<String, Object> claims = new HashMap<>();
 
         claims.put(
@@ -52,7 +51,6 @@ public class JwtProvider {
             Map<String, Object> claims,
             String subject
     ) {
-
         Date now = new Date();
 
         Date expiration =
@@ -71,26 +69,19 @@ public class JwtProvider {
     }
 
     public String extractUserId(String token) {
-
-        return extractClaim(
-                token,
-                Claims::getSubject
-        );
+        return extractClaim(token, Claims::getSubject);
     }
 
     public <T> T extractClaim(
             String token,
             Function<Claims, T> resolver
     ) {
-
-        Claims claims =
-                extractAllClaims(token);
+        Claims claims = extractAllClaims(token);
 
         return resolver.apply(claims);
     }
 
     private Claims extractAllClaims(String token) {
-
         return Jwts.parser()
                 .verifyWith(getSigningKey())
                 .build()
@@ -102,33 +93,32 @@ public class JwtProvider {
             String token,
             UserDetails userDetails
     ) {
+        String userId = extractUserId(token);
 
-        String userId =
-                extractUserId(token);
-
-        return userId.equals(
-                userDetails.getUsername()
+        return userId.equals(userDetails.getUsername()
         ) && !isTokenExpired(token);
     }
 
-    private boolean isTokenExpired(String token) {
+    public boolean isTokenValid(String token) {
+        try {
+            extractAllClaims(token);
+            return !isTokenExpired(token);
+        } catch (Exception e) {
+            return false;
+        }
+    }
 
+    private boolean isTokenExpired(String token) {
         return extractExpiration(token)
                 .before(new Date());
     }
 
     private Date extractExpiration(String token) {
-
-        return extractClaim(
-                token,
-                Claims::getExpiration
-        );
+        return extractClaim(token, Claims::getExpiration);
     }
 
     private SecretKey getSigningKey() {
-
-        byte[] keyBytes =
-                Decoders.BASE64.decode(secretKey);
+        byte[] keyBytes = Decoders.BASE64.decode(secretKey);
 
         return Keys.hmacShaKeyFor(keyBytes);
     }

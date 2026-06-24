@@ -12,6 +12,8 @@ import lombok.*;
 @Table(name = "chat_messages")
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@AllArgsConstructor(access = AccessLevel.PRIVATE)
+@Builder
 public class ChatMessage extends BaseEntity {
 
     @Id
@@ -33,6 +35,7 @@ public class ChatMessage extends BaseEntity {
     )
     private String content;
 
+    @Builder.Default
     @Column(name = "is_deleted", nullable = false)
     private Boolean isDeleted = false;
 }

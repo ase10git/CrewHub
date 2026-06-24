@@ -15,6 +15,7 @@ public enum ErrorCode {
     DOCUMENT_NOT_FOUND(HttpStatus.NOT_FOUND, "문서를 찾을 수 없습니다."),
     CATEGORY_NOT_FOUND(HttpStatus.NOT_FOUND, "카테고리를 찾을 수 없습니다."),
     GATHERING_NOT_FOUND(HttpStatus.NOT_FOUND, "모임을 찾을 수 없습니다."),
+    CHATROOM_NOT_FOUND(HttpStatus.NOT_FOUND, "채팅방을 찾을 수 없습니다."),
     APPLICATION_NOT_FOUND(HttpStatus.NOT_FOUND, "지원서를 찾을 수 없습니다."),
     GATHERING_MEMBER_NOT_FOUND(HttpStatus.NOT_FOUND, "모임 회원을 찾을 수 없습니다."),
     INVALID_KEYWORD(HttpStatus.NOT_FOUND, "키워드가 존재하지 않습니다."),

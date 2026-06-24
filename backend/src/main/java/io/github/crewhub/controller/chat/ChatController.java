@@ -1,0 +1,49 @@
+package io.github.crewhub.controller.chat;
+
+
+import io.github.crewhub.common.response.ApiResponse;
+import io.github.crewhub.dto.chat.response.ChatMessageResponse;
+import io.github.crewhub.dto.chat.response.ChatRoomResponse;
+import io.github.crewhub.dto.common.PageResponse;
+import io.github.crewhub.security.details.CustomUserDetails;
+import io.github.crewhub.service.chat.ChatService;
+import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.*;
+
+/**
+ * 채팅 정보 요청 처리
+ */
+@RestController
+@RequestMapping("/api/chat")
+@RequiredArgsConstructor
+public class ChatController {
+    private final ChatService chatService;
+
+    @GetMapping("/room/{roomId}")
+    public ApiResponse<ChatRoomResponse> getRoom(
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            @PathVariable Integer roomId
+    ) {
+        return ApiResponse.success(
+                chatService.getRoom(userDetails.getUserId(), roomId)
+        );
+    }
+
+    @GetMapping("/room/{roomId}/messages")
+    public ApiResponse<PageResponse<ChatMessageResponse>> getMessages(
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            @PathVariable Integer roomId,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "15") int size
+    ) {
+        return ApiResponse.success(
+                chatService.getMessages(
+                        userDetails.getUserId(),
+                        roomId,
+                        page,
+                        size
+                )
+        );
+    }
+}
