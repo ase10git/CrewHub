@@ -24,6 +24,7 @@ import io.github.crewhub.swagger.response.forbidden.GatheringMemberOnlyResponse;
 import io.github.crewhub.swagger.response.forbidden.MemberOnlyOrManagerCannotLeaveResponse;
 import io.github.crewhub.swagger.response.notfound.*;
 import io.github.crewhub.swagger.response.unauthorized.UnauthorizedResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -32,6 +33,10 @@ import org.springframework.web.bind.annotation.*;
 /**
  * 모임 정보 요청 처리
  */
+@Tag(
+        name = "Gathering",
+        description = "모임 및 회원 정보 API"
+)
 @RestController
 @RequestMapping("/api/gathering")
 @RequiredArgsConstructor
