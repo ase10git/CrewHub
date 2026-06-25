@@ -20,6 +20,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 /**
  * 문서 정보 요청 처리
  */
@@ -122,6 +124,16 @@ public class DocumentController {
                         page,
                         size
                 )
+        );
+    }
+
+    @GetDocumentCategoriesApi
+    @GetMapping("/document/category")
+    public ApiResponse<List<DocumentCategoryResponse>> getCategories(
+            @AuthenticationPrincipal CustomUserDetails userDetails
+    ) {
+        return ApiResponse.success(
+                documentService.getCategories()
         );
     }
 
