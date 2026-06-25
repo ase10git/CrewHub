@@ -10,7 +10,7 @@ import io.github.crewhub.dto.common.PageResponse;
 import io.github.crewhub.security.details.CustomUserDetails;
 import io.github.crewhub.service.application.ApplicationService;
 import io.github.crewhub.swagger.annotation.application.*;
-import io.github.crewhub.swagger.response.UnauthorizedResponse;
+import io.github.crewhub.swagger.response.unauthorized.UnauthorizedResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;

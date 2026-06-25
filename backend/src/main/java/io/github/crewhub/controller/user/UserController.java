@@ -8,6 +8,7 @@ import io.github.crewhub.service.user.UserService;
 import io.github.crewhub.swagger.annotation.user.MyProfileApi;
 import io.github.crewhub.swagger.annotation.user.UpdateProfileApi;
 import io.github.crewhub.swagger.annotation.user.UserProfileApi;
+import io.github.crewhub.swagger.response.unauthorized.UnauthorizedResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -21,6 +22,7 @@ import org.springframework.web.bind.annotation.*;
         name = "User",
         description = "사용자 정보 API"
 )
+@UnauthorizedResponse
 @RestController
 @RequestMapping("/api/user")
 @RequiredArgsConstructor

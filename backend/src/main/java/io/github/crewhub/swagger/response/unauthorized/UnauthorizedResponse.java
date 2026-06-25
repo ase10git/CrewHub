@@ -1,4 +1,4 @@
-package io.github.crewhub.swagger.response;
+package io.github.crewhub.swagger.response.unauthorized;
 
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;

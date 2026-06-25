@@ -1,6 +1,6 @@
 package io.github.crewhub.swagger.annotation.user;
 
-import io.github.crewhub.swagger.response.UnauthorizedResponse;
+import io.github.crewhub.swagger.response.unauthorized.UnauthorizedResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 
