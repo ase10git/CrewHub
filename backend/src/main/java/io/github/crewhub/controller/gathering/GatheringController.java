@@ -13,6 +13,16 @@ import io.github.crewhub.service.application.ApplicationService;
 import io.github.crewhub.service.gathering.GatheringMemberService;
 import io.github.crewhub.service.gathering.GatheringService;
 import io.github.crewhub.swagger.annotation.gathering.*;
+import io.github.crewhub.swagger.response.badrequest.CannotKickSelfResponse;
+import io.github.crewhub.swagger.response.badrequest.CannotTransferToSelfResponse;
+import io.github.crewhub.swagger.response.badrequest.InvalidKeywordResponse;
+import io.github.crewhub.swagger.response.conflict.AlreadyManagerResponse;
+import io.github.crewhub.swagger.response.conflict.DuplicateGatheringNameResponse;
+import io.github.crewhub.swagger.response.conflict.LastManagerCannotBeRemovedResponse;
+import io.github.crewhub.swagger.response.forbidden.GatheringManagerOnlyResponse;
+import io.github.crewhub.swagger.response.forbidden.GatheringMemberOnlyResponse;
+import io.github.crewhub.swagger.response.forbidden.MemberOnlyOrManagerCannotLeaveResponse;
+import io.github.crewhub.swagger.response.notfound.*;
 import io.github.crewhub.swagger.response.unauthorized.UnauthorizedResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -22,7 +32,6 @@ import org.springframework.web.bind.annotation.*;
 /**
  * 모임 정보 요청 처리
  */
-@UnauthorizedResponse
 @RestController
 @RequestMapping("/api/gathering")
 @RequiredArgsConstructor
@@ -43,6 +52,7 @@ public class GatheringController {
     }
 
     @GetGatheringApi
+    @GatheringNotFoundResponse
     @GetMapping("/{gatheringId}")
     public ApiResponse<GatheringDetailResponse> getGathering(
             @PathVariable Integer gatheringId
@@ -52,6 +62,8 @@ public class GatheringController {
         );
     }
 
+    @SearchGatheringByNameApi
+    @InvalidKeywordResponse
     @GetMapping("/search")
     public ApiResponse<PageResponse<GatheringSummaryResponse>> searchByName(
             @RequestParam String keyword,
@@ -63,6 +75,8 @@ public class GatheringController {
         );
     }
 
+    @SearchGatheringByCategoryApi
+    @CategoryNotFoundResponse
     @GetMapping("/category/{categoryId}")
     public ApiResponse<PageResponse<GatheringSummaryResponse>> searchByCategory(
             @PathVariable Integer categoryId,
@@ -74,6 +88,10 @@ public class GatheringController {
         );
     }
 
+    @CreateGatheringApi
+    @UnauthorizedResponse
+    @DuplicateGatheringNameResponse
+    @UserOrCategoryNotFoundResponse
     @PostMapping
     public ApiResponse<CreateGatheringResponse> create(
             @Valid @RequestBody CreateGatheringRequest request,
@@ -82,6 +100,11 @@ public class GatheringController {
         return ApiResponse.success(gatheringService.create(userDetails.getUserId(), request));
     }
 
+    @UpdateGatheringApi
+    @UnauthorizedResponse
+    @GatheringNotFoundResponse
+    @GatheringManagerOnlyResponse
+    @DuplicateGatheringNameResponse
     @PutMapping("/{gatheringId}")
     public ApiResponse<UpdateGatheringResponse> update(
             @AuthenticationPrincipal CustomUserDetails userDetails,
@@ -97,6 +120,10 @@ public class GatheringController {
         );
     }
 
+    @DeleteGatheringApi
+    @UnauthorizedResponse
+    @GatheringNotFoundResponse
+    @GatheringManagerOnlyResponse
     @DeleteMapping("/{gatheringId}")
     public ApiResponse<Void> delete(
             @AuthenticationPrincipal CustomUserDetails userDetails,
@@ -112,6 +139,10 @@ public class GatheringController {
         );
     }
 
+    @GetGatheringApplicationsApi
+    @UnauthorizedResponse
+    @GatheringManagerOnlyResponse
+    @GatheringNotFoundResponse
     @GetMapping("/application/{gatheringId}")
     public ApiResponse<PageResponse<GatheringApplicationResponse>> getGatheringApplications(
             @AuthenticationPrincipal CustomUserDetails userDetails,
@@ -136,6 +167,10 @@ public class GatheringController {
      * 모임 회원 관리
      */
 
+    @GetMembersApi
+    @UnauthorizedResponse
+    @GatheringNotFoundResponse
+    @GatheringMemberOnlyResponse
     @GetMapping("/{gatheringId}/members")
     public ApiResponse<PageResponse<GatheringMemberResponse>> getMembers(
             @AuthenticationPrincipal CustomUserDetails userDetails,
@@ -155,6 +190,9 @@ public class GatheringController {
         );
     }
 
+    @LeaveGatheringApi
+    @UnauthorizedResponse
+    @MemberOnlyOrManagerCannotLeaveResponse
     @DeleteMapping("/{gatheringId}/members/leave")
     public ApiResponse<LeaveGatheringResponse> leave(
             @AuthenticationPrincipal CustomUserDetails userDetails,
@@ -165,6 +203,12 @@ public class GatheringController {
         );
     }
 
+    @KickMemberApi
+    @UnauthorizedResponse
+    @GatheringOrMemberNotFound
+    @GatheringManagerOnlyResponse
+    @LastManagerCannotBeRemovedResponse
+    @CannotKickSelfResponse
     @DeleteMapping("/{gatheringId}/members/{userId}")
     public ApiResponse<KickMemberResponse> kickMember(
             @AuthenticationPrincipal CustomUserDetails userDetails,
@@ -176,6 +220,12 @@ public class GatheringController {
         );
     }
 
+    @TransferManagerApi
+    @UnauthorizedResponse
+    @GatheringManagerOnlyResponse
+    @CannotTransferToSelfResponse
+    @GatheringOrMemberNotFound
+    @AlreadyManagerResponse
     @PatchMapping("/{gatheringId}/manager/{userId}")
     public ApiResponse<TransferManagerResponse> transferManager(
             @AuthenticationPrincipal CustomUserDetails userDetails,
@@ -187,6 +237,8 @@ public class GatheringController {
         );
     }
 
+    @MyGatheringsApi
+    @UnauthorizedResponse
     @GetMapping("/my")
     public ApiResponse<PageResponse<MyGatheringResponse>> getMyGatherings(
             @AuthenticationPrincipal CustomUserDetails userDetails,
@@ -198,6 +250,8 @@ public class GatheringController {
         );
     }
 
+    @GetMemberCountApi
+    @GatheringNotFoundResponse
     @GetMapping("/{gatheringId}/members/count")
     public ApiResponse<GatheringMemberCountResponse> getMemberCount(
             @PathVariable Integer gatheringId
@@ -205,6 +259,8 @@ public class GatheringController {
         return ApiResponse.success(gatheringMemberService.getMemberCount(gatheringId));
     }
 
+    @CheckMembershipApi
+    @UnauthorizedResponse
     @GetMapping("/{gatheringId}/members/me")
     public ApiResponse<CheckMembershipResponse> checkMembership(
             @AuthenticationPrincipal CustomUserDetails userDetails,
@@ -215,6 +271,9 @@ public class GatheringController {
         );
     }
 
+    @CheckManagerApi
+    @UnauthorizedResponse
+    @GatheringMemberOnlyResponse
     @GetMapping("/{gatheringId}/members/me/manager")
     public ApiResponse<CheckManagerResponse> checkManager(
             @AuthenticationPrincipal CustomUserDetails userDetails,

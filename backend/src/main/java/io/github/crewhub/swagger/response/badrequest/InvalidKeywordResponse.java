@@ -1,4 +1,4 @@
-package io.github.crewhub.swagger.response.notfound;
+package io.github.crewhub.swagger.response.badrequest;
 
 import io.github.crewhub.common.response.ErrorResponse;
 import io.swagger.v3.oas.annotations.media.Content;
