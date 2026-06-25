@@ -1,5 +1,6 @@
 package io.github.crewhub.security.config;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.github.crewhub.common.response.ErrorResponse;
 import io.github.crewhub.enums.common.ErrorCode;
 import jakarta.servlet.http.HttpServletRequest;
@@ -8,7 +9,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.stereotype.Component;
-import tools.jackson.databind.ObjectMapper;
 
 import java.io.IOException;
 

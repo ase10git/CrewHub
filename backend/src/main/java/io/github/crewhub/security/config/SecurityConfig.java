@@ -35,7 +35,7 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(
             HttpSecurity http
-    ) {
+    ) throws Exception{
 
         http
                 .csrf(csrf -> csrf.disable())
@@ -54,7 +54,8 @@ public class SecurityConfig {
                                 "/swagger-ui/**",
                                 "/swagger-ui.html",
 
-                                "/v1/api-docs/**",
+                                "/api-docs/**",
+                                "/api-docs.yaml",
 
                                 "/api/gathering",
                                 "/api/gathering/*",
