@@ -8,7 +8,7 @@ import lombok.Builder;
  */
 @Builder
 @Schema(description = "문서 카테고리 정보 응답")
-public record CategoryResponse(
+public record DocumentCategoryResponse(
 
         @Schema(
                 description = "카테고리 ID",

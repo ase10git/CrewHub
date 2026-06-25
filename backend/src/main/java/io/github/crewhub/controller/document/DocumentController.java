@@ -129,7 +129,7 @@ public class DocumentController {
 
     @GetDocumentCategoriesApi
     @GetMapping("/document/category")
-    public ApiResponse<List<CategoryResponse>> getCategories(
+    public ApiResponse<List<DocumentCategoryResponse>> getCategories(
             @AuthenticationPrincipal CustomUserDetails userDetails
     ) {
         return ApiResponse.success(

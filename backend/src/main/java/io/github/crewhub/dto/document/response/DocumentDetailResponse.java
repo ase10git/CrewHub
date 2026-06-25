@@ -22,7 +22,7 @@ public record DocumentDetailResponse(
         @Schema(
                 description = "문서 카테고리 목록"
         )
-        List<CategoryResponse> categoryList,
+        List<DocumentCategoryResponse> categoryList,
 
         @Schema(
                 description = "작성자 ID",
