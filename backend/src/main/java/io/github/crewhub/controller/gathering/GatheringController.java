@@ -138,13 +138,20 @@ public class GatheringController {
 
     @GetMapping("/{gatheringId}/members")
     public ApiResponse<PageResponse<GatheringMemberResponse>> getMembers(
+            @AuthenticationPrincipal CustomUserDetails userDetails,
             @PathVariable Integer gatheringId,
             @RequestParam(required = false) MemberRole role,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size
     ) {
         return ApiResponse.success(
-                gatheringMemberService.getMembers(gatheringId, role, page, size)
+                gatheringMemberService.getMembers(
+                        userDetails.getUserId(),
+                        gatheringId,
+                        role,
+                        page,
+                        size
+                )
         );
     }
 

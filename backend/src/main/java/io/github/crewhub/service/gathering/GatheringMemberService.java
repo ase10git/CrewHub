@@ -48,6 +48,7 @@ public class GatheringMemberService {
     }
 
     public PageResponse<GatheringMemberResponse> getMembers(
+            Integer userId,
             Integer gatheringId,
             MemberRole role,
             int page,
@@ -55,6 +56,8 @@ public class GatheringMemberService {
     ) {
 
         findGathering(gatheringId);
+
+        validateMember(userId, gatheringId);
 
         Pageable pageable = PageRequest.of(page, size);
 
@@ -79,6 +82,14 @@ public class GatheringMemberService {
                 members.getTotalPages(),
                 members.hasNext()
         );
+    }
+
+    private void validateMember(Integer userId, Integer gatheringId) {
+        boolean exists = memberRepository.existsByGatheringIdAndUserId(gatheringId, userId);
+
+        if (!exists) {
+            throw new BusinessException(ErrorCode.GATHERING_MEMBER_ONLY);
+        }
     }
 
     @Transactional
