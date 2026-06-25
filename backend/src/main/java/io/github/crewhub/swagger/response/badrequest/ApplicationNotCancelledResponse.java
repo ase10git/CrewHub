@@ -1,0 +1,19 @@
+package io.github.crewhub.swagger.response.badrequest;
+
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+
+import java.lang.annotation.*;
+
+/**
+ * Swagger
+ * 취소되지 않은 지원서 문서
+ */
+@Target(ElementType.METHOD)
+@Retention(RetentionPolicy.RUNTIME)
+@Documented
+@ApiResponse(
+        responseCode = "400",
+        description = "취소된 지원서만 복구할 수 있습니다."
+)
+public @interface ApplicationNotCancelledResponse {
+}
