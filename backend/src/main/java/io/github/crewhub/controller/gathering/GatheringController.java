@@ -12,6 +12,7 @@ import io.github.crewhub.security.details.CustomUserDetails;
 import io.github.crewhub.service.application.ApplicationService;
 import io.github.crewhub.service.gathering.GatheringMemberService;
 import io.github.crewhub.service.gathering.GatheringService;
+import io.github.crewhub.swagger.annotation.document.GetGatheringCategoriesApi;
 import io.github.crewhub.swagger.annotation.gathering.*;
 import io.github.crewhub.swagger.response.badrequest.CannotKickSelfResponse;
 import io.github.crewhub.swagger.response.badrequest.CannotTransferToSelfResponse;
@@ -29,6 +30,8 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 /**
  * 모임 정보 요청 처리
@@ -90,6 +93,14 @@ public class GatheringController {
     ) {
         return ApiResponse.success(
                 gatheringService.searchByCategory(categoryId, page, size)
+        );
+    }
+
+    @GetGatheringCategoriesApi
+    @GetMapping("/category")
+    public ApiResponse<List<GatheringCategoryResponse>> getCategories() {
+        return ApiResponse.success(
+                gatheringService.getCategories()
         );
     }
 

@@ -25,6 +25,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+
 /**
  * 모임 서비스
  */
@@ -118,6 +120,18 @@ public class GatheringService {
                 gatherings.getTotalPages(),
                 gatherings.hasNext()
         );
+    }
+
+    public List<GatheringCategoryResponse> getCategories() {
+        return categoryRepository.findAll()
+                .stream()
+                .map(category -> GatheringCategoryResponse.builder()
+                        .categoryId(category.getId())
+                        .key(category.getKey())
+                        .label(category.getLabel())
+                        .build()
+                )
+                .toList();
     }
 
     private GatheringSummaryResponse toSummaryResponse(Gathering gathering) {
