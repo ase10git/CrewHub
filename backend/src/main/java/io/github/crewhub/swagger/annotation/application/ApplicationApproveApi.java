@@ -2,7 +2,6 @@ package io.github.crewhub.swagger.annotation.application;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.responses.ApiResponses;
 
 import java.lang.annotation.*;
 
@@ -21,26 +20,9 @@ import java.lang.annotation.*;
                 승인 시 모임 멤버가 생성됩니다.
                 """
 )
-@ApiResponses({
-        @ApiResponse(
-                responseCode = "200",
-                description = "승인 성공"
-        ),
-        @ApiResponse(
-                responseCode = "403",
-                description = "모임 관리자만 처리할 수 있습니다."
-        ),
-        @ApiResponse(
-                responseCode = "404",
-                description = "신청서를 찾을 수 없습니다."
-        ),
-        @ApiResponse(
-                responseCode = "409",
-                description = """
-                이미 처리된 신청서입니다.
-                또는 이미 가입된 사용자입니다.
-                """
-        )
-})
+@ApiResponse(
+        responseCode = "200",
+        description = "승인 성공"
+)
 public @interface ApplicationApproveApi {
 }

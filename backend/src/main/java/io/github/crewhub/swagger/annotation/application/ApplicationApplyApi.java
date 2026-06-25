@@ -28,10 +28,6 @@ import java.lang.annotation.*;
                 description = "가입 신청 성공"
         ),
         @ApiResponse(
-                responseCode = "404",
-                description = "사용자 또는 모임을 찾을 수 없음"
-        ),
-        @ApiResponse(
                 responseCode = "409",
                 description = """
                 이미 신청한 모임입니다.
