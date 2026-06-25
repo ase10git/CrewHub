@@ -1,11 +1,10 @@
 package io.github.crewhub.swagger.response;
 
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+import java.lang.annotation.*;
 
 /**
  * Swagger
@@ -17,9 +16,17 @@ import java.lang.annotation.Target;
         ElementType.ANNOTATION_TYPE
 })
 @Retention(RetentionPolicy.RUNTIME)
-@ApiResponse(
-        responseCode = "401",
-        description = "인증 실패"
-)
+@Documented
+@ApiResponses({
+        @ApiResponse(
+                responseCode = "401",
+                description = "인증 실패"
+        ),
+        @ApiResponse(
+                responseCode = "403",
+                description = "접근 권한이 없습니다."
+        )
+})
+@SecurityRequirement(name = "Bearer Authentication")
 public @interface UnauthorizedResponse {
 }
