@@ -1,6 +1,5 @@
 package io.github.crewhub.swagger.annotation.user;
 
-import io.github.crewhub.swagger.response.unauthorized.UnauthorizedResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 
@@ -21,6 +20,5 @@ import java.lang.annotation.*;
         responseCode = "200",
         description = "프로필 조회 성공"
 )
-@UnauthorizedResponse
 public @interface MyProfileApi {
 }

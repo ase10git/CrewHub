@@ -8,6 +8,8 @@ import io.github.crewhub.service.user.UserService;
 import io.github.crewhub.swagger.annotation.user.MyProfileApi;
 import io.github.crewhub.swagger.annotation.user.UpdateProfileApi;
 import io.github.crewhub.swagger.annotation.user.UserProfileApi;
+import io.github.crewhub.swagger.response.conflict.DuplicateUsernameResponse;
+import io.github.crewhub.swagger.response.notfound.UserNotFoundResponse;
 import io.github.crewhub.swagger.response.unauthorized.UnauthorizedResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -30,6 +32,7 @@ public class UserController {
     private final UserService userService;
 
     @MyProfileApi
+    @UserNotFoundResponse
     @GetMapping("/me")
     public ApiResponse<UserProfileResponse> getMyProfile(
             @AuthenticationPrincipal CustomUserDetails userDetails
@@ -38,6 +41,7 @@ public class UserController {
     }
 
     @UserProfileApi
+    @UserNotFoundResponse
     @GetMapping("/{userId}")
     public ApiResponse<UserProfileResponse> getUserProfile(
             @PathVariable Integer userId
@@ -46,6 +50,8 @@ public class UserController {
     }
 
     @UpdateProfileApi
+    @UserNotFoundResponse
+    @DuplicateUsernameResponse
     @PutMapping("/me")
     public ApiResponse<UserProfileResponse> updateProfile(
             @AuthenticationPrincipal CustomUserDetails userDetails,
