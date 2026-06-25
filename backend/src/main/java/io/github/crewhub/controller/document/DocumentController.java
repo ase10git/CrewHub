@@ -7,20 +7,36 @@ import io.github.crewhub.dto.document.request.UpdateDocumentRequest;
 import io.github.crewhub.dto.document.response.*;
 import io.github.crewhub.security.details.CustomUserDetails;
 import io.github.crewhub.service.document.DocumentService;
+import io.github.crewhub.swagger.annotation.document.*;
+import io.github.crewhub.swagger.response.badrequest.InvalidKeywordResponse;
+import io.github.crewhub.swagger.response.forbidden.AccessDeniedResponse;
+import io.github.crewhub.swagger.response.forbidden.GatheringMemberOnlyResponse;
+import io.github.crewhub.swagger.response.forbidden.MemberOrWriterOnlyResponse;
+import io.github.crewhub.swagger.response.notfound.*;
+import io.github.crewhub.swagger.response.unauthorized.UnauthorizedResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 /**
- * 모임 정보 요청 처리
+ * 문서 정보 요청 처리
  */
+@Tag(
+        name = "Document",
+        description = "문서 API"
+)
+@UnauthorizedResponse
 @RestController
 @RequestMapping("/api")
 @RequiredArgsConstructor
 public class DocumentController {
     private final DocumentService documentService;
 
+    @CreateDocumentApi
+    @UserOrCategoryNotFoundResponse
+    @GatheringMemberOnlyResponse
     @PostMapping("/document")
     public ApiResponse<CreateDocumentResponse> create(
             @AuthenticationPrincipal CustomUserDetails userDetails,
@@ -32,6 +48,8 @@ public class DocumentController {
         );
     }
 
+    @GetDocumentsApi
+    @GatheringMemberOnlyResponse
     @GetMapping("/gathering/{gatheringId}/document")
     public ApiResponse<PageResponse<DocumentSummaryResponse>> getDocuments(
             @AuthenticationPrincipal CustomUserDetails userDetails,
@@ -49,6 +67,9 @@ public class DocumentController {
         );
     }
 
+    @GetDocumentApi
+    @DocumentNotFoundResponse
+    @GatheringMemberOnlyResponse
     @GetMapping("/document/{documentId}")
     public ApiResponse<DocumentDetailResponse> getDocument(
             @AuthenticationPrincipal CustomUserDetails userDetails,
@@ -59,6 +80,10 @@ public class DocumentController {
         );
     }
 
+    @SearchDocumentByTitleApi
+    @InvalidKeywordResponse
+    @GatheringNotFoundResponse
+    @GatheringMemberOnlyResponse
     @GetMapping("/gathering/{gatheringId}/document/search")
     public ApiResponse<PageResponse<DocumentSummaryResponse>> searchByName(
             @AuthenticationPrincipal CustomUserDetails userDetails,
@@ -78,6 +103,9 @@ public class DocumentController {
         );
     }
 
+    @SearchDocumentByCategoryApi
+    @GatheringOrCategoryNotFoundResponse
+    @GatheringMemberOnlyResponse
     @GetMapping("/gathering/{gatheringId}/document/category/{categoryId}")
     public ApiResponse<PageResponse<DocumentSummaryResponse>> searchByCategory(
             @AuthenticationPrincipal CustomUserDetails userDetails,
@@ -97,6 +125,7 @@ public class DocumentController {
         );
     }
 
+    @MyDocumentsApi
     @GetMapping("/document/my")
     public ApiResponse<PageResponse<MyDocumentResponse>> getMyDocuments(
             @AuthenticationPrincipal CustomUserDetails userDetails,
@@ -108,6 +137,9 @@ public class DocumentController {
         );
     }
 
+    @UpdateDocumentApi
+    @DocumentPropertiesNotFoundResponse
+    @MemberOrWriterOnlyResponse
     @PutMapping("/document/{documentId}")
     public ApiResponse<UpdateDocumentResponse> update(
             @AuthenticationPrincipal CustomUserDetails userDetails,
@@ -123,6 +155,8 @@ public class DocumentController {
         );
     }
 
+    @DeleteDocumentApi
+    @AccessDeniedResponse
     @DeleteMapping("/document/{documentId}")
     public ApiResponse<Void> delete(
             @AuthenticationPrincipal CustomUserDetails userDetails,
@@ -135,6 +169,8 @@ public class DocumentController {
         );
     }
 
+    @GetDocumentCountApi
+    @GatheringNotFoundResponse
     @GetMapping("/gathering/{gatheringId}/document/count")
     public ApiResponse<GatheringDocumentCountResponse> getDocumentCount(
             @PathVariable Integer gatheringId
@@ -142,6 +178,7 @@ public class DocumentController {
         return ApiResponse.success(documentService.getDocumentCount(gatheringId));
     }
 
+    @MyDocumentCountApi
     @GetMapping("/document/my/count")
     public ApiResponse<MyDocumentCountResponse> getMyDocumentCount(
             @AuthenticationPrincipal CustomUserDetails userDetails
