@@ -18,7 +18,6 @@ public enum ErrorCode {
     CHATROOM_NOT_FOUND(HttpStatus.NOT_FOUND, "채팅방을 찾을 수 없습니다."),
     APPLICATION_NOT_FOUND(HttpStatus.NOT_FOUND, "지원서를 찾을 수 없습니다."),
     GATHERING_MEMBER_NOT_FOUND(HttpStatus.NOT_FOUND, "모임 회원을 찾을 수 없습니다."),
-    INVALID_KEYWORD(HttpStatus.NOT_FOUND, "키워드가 존재하지 않습니다."),
 
     DUPLICATE_EMAIL(HttpStatus.CONFLICT, "이미 사용중인 이메일입니다."),
     DUPLICATE_USERNAME(HttpStatus.CONFLICT, "이미 사용중인 사용자명입니다."),
@@ -32,6 +31,7 @@ public enum ErrorCode {
     APPLICATION_NOT_CANCELLED(HttpStatus.BAD_REQUEST, "취소된 지원서만 복구할 수 있습니다."),
     CANNOT_KICK_SELF(HttpStatus.BAD_REQUEST, "자신은 강제 탈퇴시킬 수 없습니다."),
     CANNOT_TRANSFER_TO_SELF(HttpStatus.BAD_REQUEST, "자기 자신에게 관리자 권한을 위임할 수 없습니다."),
+    INVALID_KEYWORD(HttpStatus.BAD_REQUEST, "키워드가 존재하지 않습니다."),
 
     ACCESS_DENIED(HttpStatus.FORBIDDEN, "접근 권한이 없습니다."),
     GATHERING_MANAGER_ONLY(HttpStatus.FORBIDDEN, "모임 관리자만 가능합니다."),
