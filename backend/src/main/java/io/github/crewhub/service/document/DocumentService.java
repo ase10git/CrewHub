@@ -291,6 +291,18 @@ public class DocumentService {
                 );
     }
 
+    public List<CategoryResponse> getCategories() {
+        return categoryRepository.findAll()
+                .stream()
+                .map(category -> CategoryResponse.builder()
+                        .categoryId(category.getId())
+                        .key(category.getKey())
+                        .label(category.getLabel())
+                        .build()
+                )
+                .toList();
+    }
+
     public PageResponse<MyDocumentResponse> getMyDocuments(
             Integer userId,
             int page,
