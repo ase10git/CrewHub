@@ -8,6 +8,8 @@ import io.github.crewhub.dto.auth.response.SignUpResponse;
 import io.github.crewhub.service.auth.AuthService;
 import io.github.crewhub.swagger.annotation.auth.AuthLoginApi;
 import io.github.crewhub.swagger.annotation.auth.AuthRegisterApi;
+import io.github.crewhub.swagger.response.conflict.DuplicateUserResponse;
+import io.github.crewhub.swagger.response.unauthorized.InvalidLoginResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -27,6 +29,7 @@ public class AuthController {
     private final AuthService authService;
 
     @AuthLoginApi
+    @InvalidLoginResponse
     @PostMapping("/login")
     public ApiResponse<LoginResponse> login(
             @Valid @RequestBody LoginRequest loginRequest
@@ -35,6 +38,7 @@ public class AuthController {
     }
 
     @AuthRegisterApi
+    @DuplicateUserResponse
     @PostMapping("/signup")
     public ApiResponse<SignUpResponse> signup(
             @Valid @RequestBody SignUpRequest signUpRequest
