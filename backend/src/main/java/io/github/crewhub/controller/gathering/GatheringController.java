@@ -12,6 +12,8 @@ import io.github.crewhub.security.details.CustomUserDetails;
 import io.github.crewhub.service.application.ApplicationService;
 import io.github.crewhub.service.gathering.GatheringMemberService;
 import io.github.crewhub.service.gathering.GatheringService;
+import io.github.crewhub.swagger.annotation.gathering.*;
+import io.github.crewhub.swagger.response.unauthorized.UnauthorizedResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -20,6 +22,7 @@ import org.springframework.web.bind.annotation.*;
 /**
  * 모임 정보 요청 처리
  */
+@UnauthorizedResponse
 @RestController
 @RequestMapping("/api/gathering")
 @RequiredArgsConstructor
@@ -28,6 +31,7 @@ public class GatheringController {
     private final GatheringMemberService gatheringMemberService;
     private final ApplicationService applicationService;
 
+    @GetGatheringsApi
     @GetMapping
     public ApiResponse<PageResponse<GatheringSummaryResponse>> getGatherings(
             @RequestParam(defaultValue = "0") int page,
@@ -38,6 +42,7 @@ public class GatheringController {
         );
     }
 
+    @GetGatheringApi
     @GetMapping("/{gatheringId}")
     public ApiResponse<GatheringDetailResponse> getGathering(
             @PathVariable Integer gatheringId
