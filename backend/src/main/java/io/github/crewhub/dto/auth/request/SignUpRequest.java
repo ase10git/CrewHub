@@ -10,6 +10,7 @@ import lombok.Builder;
  * 회원가입 요청 데이터
  */
 @Builder
+@Schema(description = "회원가입 정보")
 public record SignUpRequest (
         @Schema(
                 description = "이메일",

@@ -9,6 +9,7 @@ import lombok.Builder;
  * 로그인 요청 데이터
  */
 @Builder
+@Schema(description = "로그인 요청")
 public record LoginRequest (
         @Schema(
                 description = "로그인 이메일",

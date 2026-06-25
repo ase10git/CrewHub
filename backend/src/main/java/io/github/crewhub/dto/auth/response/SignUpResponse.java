@@ -7,6 +7,7 @@ import lombok.Builder;
  * 회원가입 결과 데이터
  */
 @Builder
+@Schema(description = "회원가입 결과")
 public record SignUpResponse(
 
         @Schema(

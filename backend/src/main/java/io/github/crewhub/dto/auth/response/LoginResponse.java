@@ -7,6 +7,7 @@ import lombok.Builder;
  * 로그인 결과 데이터
  */
 @Builder
+@Schema(description = "로그인 결과")
 public record LoginResponse(
         @Schema(
                 description = "회원 ID",
