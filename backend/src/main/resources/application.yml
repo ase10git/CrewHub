@@ -1,0 +1,24 @@
+server:
+  error:
+    whitelabel:
+      enabled: false
+
+spring:
+  application:
+    name: CrewHub
+
+app:
+  name: ${APP_NAME:CrewHub}
+  version: ${APP_VERSION:0.0.0}
+
+logging:
+  level:
+    root: ${LOG_LEVEL:INFO}
+
+jwt:
+  secret-key: ${JWT_SECRET}
+  access-token-expiration: ${JWT_ACCESS_TOKEN_EXPIRE}
+
+springdoc:
+  api-docs:
+    path: /api-docs
