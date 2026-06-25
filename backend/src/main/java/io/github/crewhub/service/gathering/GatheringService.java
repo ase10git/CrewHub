@@ -101,6 +101,8 @@ public class GatheringService {
     }
 
     public PageResponse<GatheringSummaryResponse> searchByCategory(Integer categoryId, int page, int size) {
+        getCategory(categoryId);
+
         Pageable pageable = PageRequest.of(page, size);
 
         Page<Gathering> gatherings = gatheringRepository
