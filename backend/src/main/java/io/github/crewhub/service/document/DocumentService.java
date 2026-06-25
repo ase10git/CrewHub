@@ -166,11 +166,11 @@ public class DocumentService {
 
         validateMember(userId, document.getGathering().getId());
 
-        List<CategoryResponse> categoryResponseList =
+        List<DocumentCategoryResponse> documentCategoryResponseList =
                 categoryMapRepository.findDocumentCategory(documentId)
                         .stream()
                         .map(categoryMap ->
-                                CategoryResponse.builder()
+                                DocumentCategoryResponse.builder()
                                         .categoryId(categoryMap.getCategory().getId())
                                         .key(categoryMap.getCategory().getKey())
                                         .label(categoryMap.getCategory().getLabel())
@@ -181,7 +181,7 @@ public class DocumentService {
 
         return DocumentDetailResponse.builder()
                 .documentId(documentId)
-                .categoryList(categoryResponseList)
+                .categoryList(documentCategoryResponseList)
                 .writerId(document.getWriter().getId())
                 .writerName(document.getWriter().getUsername())
                 .gatheringId(document.getGathering().getId())
@@ -289,6 +289,18 @@ public class DocumentService {
                 .findById(categoryId).orElseThrow(
                         () -> new BusinessException(ErrorCode.CATEGORY_NOT_FOUND)
                 );
+    }
+
+    public List<DocumentCategoryResponse> getCategories() {
+        return categoryRepository.findAll()
+                .stream()
+                .map(category -> DocumentCategoryResponse.builder()
+                        .categoryId(category.getId())
+                        .key(category.getKey())
+                        .label(category.getLabel())
+                        .build()
+                )
+                .toList();
     }
 
     public PageResponse<MyDocumentResponse> getMyDocuments(

@@ -21,7 +21,8 @@ public interface GatheringRepository extends JpaRepository<Gathering, Integer> {
         from Gathering g
         join fetch g.category
         join fetch g.manager
-        where g.isDeleted = false
+        where g.id = :gatheringId 
+        and g.isDeleted = false
     """,
     countQuery = """
         select count(g)

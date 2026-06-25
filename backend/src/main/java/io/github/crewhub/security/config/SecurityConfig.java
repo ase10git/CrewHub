@@ -4,6 +4,7 @@ import io.github.crewhub.security.jwt.JwtAuthenticationFilter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -35,7 +36,7 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(
             HttpSecurity http
-    ) {
+    ) throws Exception{
 
         http
                 .csrf(csrf -> csrf.disable())
@@ -54,15 +55,19 @@ public class SecurityConfig {
                                 "/swagger-ui/**",
                                 "/swagger-ui.html",
 
-                                "/v1/api-docs/**",
-
-                                "/api/gathering",
-                                "/api/gathering/*",
+                                "/api-docs/**",
+                                "/api-docs.yaml",
 
                                 "/ws/**",
                                 "/ws"
                         ).permitAll()
-
+                        .requestMatchers(HttpMethod.GET,
+                                "/api/gathering",
+                                "/api/gathering/*",
+                                "/api/gathering/search",
+                                "/api/gathering/category/*",
+                                "/api/gathering/*/members/count"
+                        ).permitAll()
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(
