@@ -5,16 +5,24 @@ import io.github.crewhub.dto.auth.request.LoginRequest;
 import io.github.crewhub.dto.auth.request.SignUpRequest;
 import io.github.crewhub.dto.auth.response.LoginResponse;
 import io.github.crewhub.dto.auth.response.SignUpResponse;
+import io.github.crewhub.entity.auth.RefreshToken;
 import io.github.crewhub.entity.user.User;
 import io.github.crewhub.enums.common.ErrorCode;
 import io.github.crewhub.enums.user.UserStatus;
+import io.github.crewhub.repository.token.TokenRepository;
 import io.github.crewhub.repository.user.UserRepository;
 import io.github.crewhub.security.details.CustomUserDetails;
 import io.github.crewhub.security.jwt.JwtProvider;
+import io.github.crewhub.utils.DateUtils;
+import io.github.crewhub.utils.TokenHashUtils;
+import io.jsonwebtoken.Claims;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.time.LocalDateTime;
+import java.util.concurrent.TimeUnit;
 
 /**
  * 인증 인가 서비스
@@ -26,6 +34,10 @@ public class AuthService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtProvider jwtProvider;
+    private final TokenRepository tokenRepository;
+
+    private final DateUtils dateUtils;
+    private final TokenHashUtils tokenHashUtils;
 
     public LoginResponse login(LoginRequest request) {
         User user = userRepository.findByEmail(request.email()).orElseThrow(
@@ -35,6 +47,12 @@ public class AuthService {
         validatePassword(request.password(), user.getPassword());
 
         String accessToken = jwtProvider.generateAccessToken(new CustomUserDetails(user));
+
+        String refreshToken = jwtProvider.generateRefreshToken(user.getId());
+
+        saveRefreshToken(user.getId(), refreshToken);
+
+        // Todo: Cookie에 Refresh Token 담기
 
         return LoginResponse.builder()
                 .userId(user.getId())
@@ -60,6 +78,12 @@ public class AuthService {
 
         String accessToken = jwtProvider.generateAccessToken(new CustomUserDetails(savedUser));
 
+        String refreshToken = jwtProvider.generateRefreshToken(savedUser.getId());
+
+        saveRefreshToken(user.getId(), refreshToken);
+
+        // Todo: Cookie에 Refresh Token 담기
+
         return SignUpResponse.builder()
                 .userId(savedUser.getId())
                 .username(savedUser.getUsername())
@@ -80,5 +104,35 @@ public class AuthService {
         if (!passwordEncoder.matches(rawPassword, encodedPassword)) {
             throw new BusinessException(ErrorCode.INVALID_LOGIN);
         }
+    }
+
+    private void saveRefreshToken(Integer userId, String refreshToken) {
+        String hashedRefreshToken = tokenHashUtils.hash(refreshToken);
+
+        Claims claims = jwtProvider.parseRefreshToken(refreshToken);
+
+        LocalDateTime issuedAt = dateUtils.toLocalDateTime(
+                jwtProvider.extractIssuedAt(claims)
+        );
+        LocalDateTime expiredAt = dateUtils.toLocalDateTime(
+                jwtProvider.extractExpiration(claims)
+        );
+
+        Long ttl = TimeUnit.MILLISECONDS.toSeconds(
+                jwtProvider.getRefreshTokenExpiration()
+        );
+
+        RefreshToken token = RefreshToken.builder()
+                .userId(userId)
+                .refreshTokenHash(hashedRefreshToken)
+                .issuedAt(issuedAt)
+                .jti(claims.getId())
+                .expiredAt(expiredAt)
+                .ttl(ttl)
+                .build();
+
+        tokenRepository.deleteById(String.valueOf(userId));
+
+        tokenRepository.save(token);
     }
 }

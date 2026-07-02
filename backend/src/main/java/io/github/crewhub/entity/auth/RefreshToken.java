@@ -27,7 +27,9 @@ public class RefreshToken {
 
     private LocalDateTime expiredAt;
 
-    private LocalDateTime createdAt;
+    private LocalDateTime issuedAt;
+
+    private String jti;
 
     @TimeToLive
     private Long ttl;
