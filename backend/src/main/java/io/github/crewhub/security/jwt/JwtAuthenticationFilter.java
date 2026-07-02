@@ -51,7 +51,7 @@ public class JwtAuthenticationFilter  extends OncePerRequestFilter {
 
         try {
             String jwt = authHeader.substring(7);
-            String userId = jwtProvider.extractUserId(jwt);
+            String userId = jwtProvider.extractAccessTokenUserId(jwt);
 
             if (userId != null
                     && SecurityContextHolder

@@ -50,7 +50,7 @@ public class WebSocketInterceptor implements ChannelInterceptor {
 
             jwtProvider.validateAccessToken(token);
 
-            Integer userId = Integer.valueOf(jwtProvider.extractUserId(token));
+            Integer userId = Integer.valueOf(jwtProvider.extractAccessTokenUserId(token));
 
             UserDetails userDetails = userDetailsService.loadByUserId(userId);
 
