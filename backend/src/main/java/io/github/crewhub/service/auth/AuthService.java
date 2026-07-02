@@ -34,7 +34,7 @@ public class AuthService {
 
         validatePassword(request.password(), user.getPassword());
 
-        String accessToken = jwtProvider.generateToken(new CustomUserDetails(user));
+        String accessToken = jwtProvider.generateAccessToken(new CustomUserDetails(user));
 
         return LoginResponse.builder()
                 .userId(user.getId())
@@ -58,7 +58,7 @@ public class AuthService {
 
         User savedUser = userRepository.save(user);
 
-        String accessToken = jwtProvider.generateToken(new CustomUserDetails(savedUser));
+        String accessToken = jwtProvider.generateAccessToken(new CustomUserDetails(savedUser));
 
         return SignUpResponse.builder()
                 .userId(savedUser.getId())

@@ -1,10 +1,12 @@
 package io.github.crewhub.security.jwt;
 
+import io.github.crewhub.common.exception.BusinessException;
+import io.github.crewhub.enums.common.ErrorCode;
 import io.github.crewhub.security.details.CustomUserDetails;
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.*;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
+import io.jsonwebtoken.security.SecurityException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -14,6 +16,7 @@ import javax.crypto.SecretKey;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 import java.util.function.Function;
 
 
@@ -26,9 +29,10 @@ public class JwtProvider {
     @Value("${jwt.access-token-expiration}")
     private Long accessTokenExpiration;
 
-    public String generateToken(
-            CustomUserDetails userDetails
-    ) {
+    @Value("${jwt.refresh-token-expiration}")
+    private Long refreshTokenExpiration;
+
+    public String generateAccessToken(CustomUserDetails userDetails) {
         Map<String, Object> claims = new HashMap<>();
 
         claims.put(
@@ -41,80 +45,142 @@ public class JwtProvider {
                 userDetails.getNickname()
         );
 
-        return buildToken(
-                claims,
-                String.valueOf(userDetails.getUserId())
-        );
-    }
-
-    private String buildToken(
-            Map<String, Object> claims,
-            String subject
-    ) {
         Date now = new Date();
 
-        Date expiration =
-                new Date(
-                        now.getTime()
-                                + accessTokenExpiration
-                );
+        Date expiration = new Date(
+                now.getTime() + accessTokenExpiration
+        );
 
         return Jwts.builder()
                 .claims(claims)
-                .subject(subject)
+                .subject(String.valueOf(userDetails.getUserId()))
                 .issuedAt(now)
                 .expiration(expiration)
                 .signWith(getSigningKey())
                 .compact();
     }
 
+    public String generateRefreshToken(Integer userId) {
+        Map<String, Object> claims = new HashMap<>();
+
+        claims.put(
+                "type",
+                "refresh"
+        );
+
+        Date now = new Date();
+
+        Date expiration = new Date(
+                now.getTime() + refreshTokenExpiration
+        );
+
+        return Jwts.builder()
+                .claims(claims)
+                .subject(String.valueOf(userId))
+                .id(UUID.randomUUID().toString())
+                .issuedAt(now)
+                .expiration(expiration)
+                .signWith(getSigningKey())
+                .compact();
+    }
+
+    public String extractUserId(Claims claims) {
+        return claims.getSubject();
+    }
+
     public String extractUserId(String token) {
-        return extractClaim(token, Claims::getSubject);
+        return parseAccessToken(token).getSubject();
+    }
+
+    public String extractJti(Claims claims) {
+        return claims.getId();
+    }
+
+    public String extractTokenType(Claims claims) {
+        return claims.get("type", String.class);
     }
 
     public <T> T extractClaim(
             String token,
             Function<Claims, T> resolver
     ) {
-        Claims claims = extractAllClaims(token);
+        Claims claims = parseAccessToken(token);
 
         return resolver.apply(claims);
     }
 
-    private Claims extractAllClaims(String token) {
-        return Jwts.parser()
-                .verifyWith(getSigningKey())
-                .build()
-                .parseSignedClaims(token)
-                .getPayload();
-    }
-
-    public boolean isTokenValid(
-            String token,
-            UserDetails userDetails
-    ) {
-        String userId = extractUserId(token);
-
-        return userId.equals(userDetails.getUsername()
-        ) && !isTokenExpired(token);
-    }
-
-    public boolean isTokenValid(String token) {
+    private Claims parseAccessToken(String token) {
         try {
-            extractAllClaims(token);
-            return !isTokenExpired(token);
-        } catch (Exception e) {
-            return false;
+            return Jwts.parser()
+                    .verifyWith(getSigningKey())
+                    .build()
+                    .parseSignedClaims(token)
+                    .getPayload();
+        } catch (ExpiredJwtException e) {
+            throw new BusinessException(ErrorCode.EXPIRED_ACCESS_TOKEN);
+        } catch (MalformedJwtException |
+                UnsupportedJwtException |
+                SecurityException |
+                IllegalArgumentException e
+        ) {
+            throw new BusinessException(ErrorCode.INVALID_ACCESS_TOKEN);
         }
     }
 
-    private boolean isTokenExpired(String token) {
-        return extractExpiration(token)
-                .before(new Date());
+    private Claims parseRefreshToken(String token) {
+        try {
+            return Jwts.parser()
+                    .verifyWith(getSigningKey())
+                    .build()
+                    .parseSignedClaims(token)
+                    .getPayload();
+        } catch (ExpiredJwtException e) {
+            throw new BusinessException(ErrorCode.EXPIRED_REFRESH_TOKEN);
+        } catch (MalformedJwtException |
+                 UnsupportedJwtException |
+                 SecurityException |
+                 IllegalArgumentException e
+        ) {
+            throw new BusinessException(ErrorCode.INVALID_REFRESH_TOKEN);
+        }
     }
 
-    private Date extractExpiration(String token) {
-        return extractClaim(token, Claims::getExpiration);
+    public void validateAccessToken(
+            String token,
+            UserDetails userDetails
+    ) {
+        Claims claims = parseAccessToken(token);
+        String userId = extractUserId(claims);
+
+        if (!userId.equals(userDetails.getUsername())) {
+            throw new BusinessException(ErrorCode.INVALID_ACCESS_TOKEN);
+        }
+    }
+
+    public void validateAccessToken(String token) {
+        Claims claims = parseAccessToken(token);
+
+        if (claims.getSubject() == null) {
+            throw new BusinessException(ErrorCode.INVALID_ACCESS_TOKEN);
+        }
+    }
+
+    public void validateRefreshToken(String token) {
+        Claims claims = parseRefreshToken(token);
+
+        String type = extractTokenType(claims);
+
+        if (!"refresh".equals(type)) {
+            throw new BusinessException(ErrorCode.INVALID_REFRESH_TOKEN);
+        }
+
+        if (claims.getSubject() == null) {
+            throw new BusinessException(ErrorCode.INVALID_REFRESH_TOKEN);
+        }
+
+        if (claims.getId() == null) {
+            throw new BusinessException(ErrorCode.INVALID_REFRESH_TOKEN);
+        }
     }
 
     private SecretKey getSigningKey() {

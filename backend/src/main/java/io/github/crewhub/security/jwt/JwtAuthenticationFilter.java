@@ -1,5 +1,6 @@
 package io.github.crewhub.security.jwt;
 
+import io.github.crewhub.common.exception.BusinessException;
 import io.github.crewhub.security.details.CustomUserDetailsService;
 import io.jsonwebtoken.JwtException;
 import jakarta.servlet.FilterChain;
@@ -62,28 +63,28 @@ public class JwtAuthenticationFilter  extends OncePerRequestFilter {
                         .userDetailsService
                         .loadUserByUsername(userId);
 
-                if (jwtProvider.isTokenValid(jwt, userDetails)) {
-                    UsernamePasswordAuthenticationToken authToken
-                            = new UsernamePasswordAuthenticationToken(
-                            userDetails,
-                            null,
-                            userDetails.getAuthorities()
-                    );
+                jwtProvider.validateAccessToken(jwt, userDetails);
 
-                    authToken.setDetails(
-                            new WebAuthenticationDetailsSource()
-                                    .buildDetails(request)
-                    );
+                UsernamePasswordAuthenticationToken authToken
+                        = new UsernamePasswordAuthenticationToken(
+                        userDetails,
+                        null,
+                        userDetails.getAuthorities()
+                );
 
-                    SecurityContext context =
-                            SecurityContextHolder.createEmptyContext();
+                authToken.setDetails(
+                        new WebAuthenticationDetailsSource()
+                                .buildDetails(request)
+                );
 
-                    context.setAuthentication(authToken);
+                SecurityContext context =
+                        SecurityContextHolder.createEmptyContext();
 
-                    SecurityContextHolder.setContext(context);
-                }
+                context.setAuthentication(authToken);
+
+                SecurityContextHolder.setContext(context);
             }
-        } catch (JwtException e) {
+        } catch (JwtException | BusinessException e) {
             SecurityContextHolder.clearContext();
         }
         filterChain.doFilter(request, response);

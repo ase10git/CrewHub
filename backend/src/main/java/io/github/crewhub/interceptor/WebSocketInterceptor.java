@@ -43,14 +43,12 @@ public class WebSocketInterceptor implements ChannelInterceptor {
             String bearerToken = accessor.getFirstNativeHeader("Authorization");
 
             if (bearerToken == null || !bearerToken.startsWith("Bearer ")) {
-                throw new BusinessException(ErrorCode.INVALID_TOKEN);
+                throw new BusinessException(ErrorCode.INVALID_ACCESS_TOKEN);
             }
 
             String token = bearerToken.substring(7);
 
-            if (!jwtProvider.isTokenValid(token)) {
-                throw new BusinessException(ErrorCode.INVALID_TOKEN);
-            }
+            jwtProvider.validateAccessToken(token);
 
             Integer userId = Integer.valueOf(jwtProvider.extractUserId(token));
 
