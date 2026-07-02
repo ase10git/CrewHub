@@ -88,7 +88,7 @@ public class JwtProvider {
         return claims.getSubject();
     }
 
-    public String extractUserId(String token) {
+    public String extractAccessTokenUserId(String token) {
         return parseAccessToken(token).getSubject();
     }
 
@@ -127,7 +127,7 @@ public class JwtProvider {
         }
     }
 
-    private Claims parseRefreshToken(String token) {
+    public Claims parseRefreshToken(String token) {
         try {
             return Jwts.parser()
                     .verifyWith(getSigningKey())
@@ -181,6 +181,18 @@ public class JwtProvider {
         if (claims.getId() == null) {
             throw new BusinessException(ErrorCode.INVALID_REFRESH_TOKEN);
         }
+    }
+
+    public Date extractExpiration(Claims claims) {
+        return claims.getExpiration();
+    }
+
+    public Date extractIssuedAt(Claims claims) {
+        return claims.getIssuedAt();
+    }
+
+    public Long getRefreshTokenExpiration() {
+        return refreshTokenExpiration;
     }
 
     private SecretKey getSigningKey() {
