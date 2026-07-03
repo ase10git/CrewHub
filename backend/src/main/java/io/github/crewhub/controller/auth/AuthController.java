@@ -46,15 +46,7 @@ public class AuthController {
             ) {
         LoginResult result = authService.login(loginRequest);
 
-        ResponseCookie cookie = cookieProvider.createRefreshTokenCookie(
-                result.refreshToken(),
-                jwtProvider.getRefreshTokenExpiration()
-        );
-
-        response.addHeader(
-                HttpHeaders.SET_COOKIE,
-                cookie.toString()
-        );
+        issueTokenCookie(result.refreshToken(), response);
 
         return ApiResponse.success(result.loginResponse());
     }
@@ -68,8 +60,14 @@ public class AuthController {
     ) {
         SignUpResult result = authService.signup(signUpRequest);
 
+        issueTokenCookie(result.refreshToken(), response);
+
+        return ApiResponse.success(result.signUpResponse());
+    }
+
+    private void issueTokenCookie(String refreshToken, HttpServletResponse response) {
         ResponseCookie cookie = cookieProvider.createRefreshTokenCookie(
-                result.refreshToken(),
+                refreshToken,
                 jwtProvider.getRefreshTokenExpiration()
         );
 
@@ -77,8 +75,6 @@ public class AuthController {
                 HttpHeaders.SET_COOKIE,
                 cookie.toString()
         );
-
-        return ApiResponse.success(result.signUpResponse());
     }
 
 }
