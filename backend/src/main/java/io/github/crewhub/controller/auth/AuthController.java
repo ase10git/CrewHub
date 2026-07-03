@@ -3,13 +3,13 @@ package io.github.crewhub.controller.auth;
 import io.github.crewhub.common.response.ApiResponse;
 import io.github.crewhub.dto.auth.request.LoginRequest;
 import io.github.crewhub.dto.auth.request.SignUpRequest;
-import io.github.crewhub.dto.auth.response.LoginResponse;
-import io.github.crewhub.dto.auth.response.LoginResult;
-import io.github.crewhub.dto.auth.response.SignUpResponse;
-import io.github.crewhub.dto.auth.response.SignUpResult;
+import io.github.crewhub.dto.auth.response.AuthResponse;
+import io.github.crewhub.dto.auth.response.AuthResult;
+import io.github.crewhub.dto.token.RefreshTokenInfo;
+import io.github.crewhub.entity.user.User;
 import io.github.crewhub.security.cookie.CookieProvider;
-import io.github.crewhub.security.jwt.JwtProvider;
 import io.github.crewhub.service.auth.AuthService;
+import io.github.crewhub.service.auth.TokenService;
 import io.github.crewhub.swagger.annotation.auth.AuthLoginApi;
 import io.github.crewhub.swagger.annotation.auth.AuthRegisterApi;
 import io.github.crewhub.swagger.response.conflict.DuplicateUserResponse;
@@ -34,42 +34,51 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 public class AuthController {
     private final AuthService authService;
+    private final TokenService tokenService;
+
     private final CookieProvider cookieProvider;
-    private final JwtProvider jwtProvider;
 
     @AuthLoginApi
     @InvalidLoginResponse
     @PostMapping("/login")
-    public ApiResponse<LoginResponse> login(
+    public ApiResponse<AuthResponse> login(
             @Valid @RequestBody LoginRequest loginRequest,
             HttpServletResponse response
             ) {
-        LoginResult result = authService.login(loginRequest);
+        User user = authService.login(loginRequest);
 
-        issueTokenCookie(result.refreshToken(), response);
-
-        return ApiResponse.success(result.loginResponse());
+        return authenticate(user, response);
     }
 
     @AuthRegisterApi
     @DuplicateUserResponse
     @PostMapping("/signup")
-    public ApiResponse<SignUpResponse> signup(
+    public ApiResponse<AuthResponse> signup(
             @Valid @RequestBody SignUpRequest signUpRequest,
             HttpServletResponse response
     ) {
-        SignUpResult result = authService.signup(signUpRequest);
+        User user = authService.signup(signUpRequest);
 
-        issueTokenCookie(result.refreshToken(), response);
-
-        return ApiResponse.success(result.signUpResponse());
+        return authenticate(user, response);
     }
 
-    private void issueTokenCookie(String refreshToken, HttpServletResponse response) {
-        ResponseCookie cookie = cookieProvider.createRefreshTokenCookie(
-                refreshToken,
-                jwtProvider.getRefreshTokenExpiration()
+    private ApiResponse<AuthResponse> authenticate(User user, HttpServletResponse response) {
+        AuthResult result = tokenService.issueAccessToken(user);
+
+        return responseWithToken(result, response);
+    }
+
+    private ApiResponse<AuthResponse> responseWithToken(AuthResult result, HttpServletResponse response) {
+        issueTokenCookie(
+                result.refreshTokenInfo(),
+                response
         );
+
+        return ApiResponse.success(result.authResponse());
+    }
+
+    private void issueTokenCookie(RefreshTokenInfo refreshTokenInfo, HttpServletResponse response) {
+        ResponseCookie cookie = cookieProvider.createRefreshTokenCookie(refreshTokenInfo);
 
         response.addHeader(
                 HttpHeaders.SET_COOKIE,

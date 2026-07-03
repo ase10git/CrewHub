@@ -1,10 +1,12 @@
 package io.github.crewhub.security.cookie;
 
+import io.github.crewhub.dto.token.RefreshTokenInfo;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseCookie;
 import org.springframework.stereotype.Component;
 
 import java.time.Duration;
+import java.time.Instant;
 
 /**
  * Cookie 생성
@@ -24,14 +26,19 @@ public class CookieProvider {
     @Value("${cookie.same-site}")
     private String sameSite;
 
-    public ResponseCookie createRefreshTokenCookie(String refreshToken, long maxAgeMillis) {
+    public ResponseCookie createRefreshTokenCookie(RefreshTokenInfo refreshTokenInfo) {
         ResponseCookie.ResponseCookieBuilder builder =
-                ResponseCookie.from("refreshToken", refreshToken)
+                ResponseCookie.from("refreshToken", refreshTokenInfo.refreshToken())
                 .httpOnly(httpOnly)
                 .secure(secure)
                 .domain("")
                 .path("/")
-                .maxAge(Duration.ofMillis(maxAgeMillis))
+                .maxAge(
+                        Duration.between(
+                                Instant.now(),
+                                refreshTokenInfo.expiresAt()
+                        )
+                )
                 .sameSite(sameSite);
 
         if (domain != null && !domain.isBlank()) {

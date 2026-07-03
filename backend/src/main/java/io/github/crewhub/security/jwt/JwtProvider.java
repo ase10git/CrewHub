@@ -1,8 +1,9 @@
 package io.github.crewhub.security.jwt;
 
 import io.github.crewhub.common.exception.BusinessException;
+import io.github.crewhub.dto.token.RefreshTokenInfo;
+import io.github.crewhub.entity.user.User;
 import io.github.crewhub.enums.common.ErrorCode;
-import io.github.crewhub.security.details.CustomUserDetails;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
@@ -34,17 +35,17 @@ public class JwtProvider {
     @Value("${jwt.refresh-token-expiration}")
     private Long refreshTokenExpiration;
 
-    public String generateAccessToken(CustomUserDetails userDetails) {
+    public String generateAccessToken(User user) {
         Map<String, Object> claims = new HashMap<>();
 
         claims.put(
                 "email",
-                userDetails.getEmail()
+                user.getEmail()
         );
 
         claims.put(
                 "username",
-                userDetails.getNickname()
+                user.getUsername()
         );
 
         Date now = new Date();
@@ -55,14 +56,14 @@ public class JwtProvider {
 
         return Jwts.builder()
                 .claims(claims)
-                .subject(String.valueOf(userDetails.getUserId()))
+                .subject(String.valueOf(user.getId()))
                 .issuedAt(now)
                 .expiration(expiration)
                 .signWith(getSigningKey())
                 .compact();
     }
 
-    public String generateRefreshToken(Integer userId) {
+    public RefreshTokenInfo generateRefreshToken(Integer userId) {
         Map<String, Object> claims = new HashMap<>();
 
         claims.put(
@@ -76,7 +77,7 @@ public class JwtProvider {
                 now.getTime() + refreshTokenExpiration
         );
 
-        return Jwts.builder()
+        String refreshToken = Jwts.builder()
                 .claims(claims)
                 .subject(String.valueOf(userId))
                 .id(UUID.randomUUID().toString())
@@ -84,6 +85,11 @@ public class JwtProvider {
                 .expiration(expiration)
                 .signWith(getSigningKey())
                 .compact();
+
+        return RefreshTokenInfo.builder()
+                .refreshToken(refreshToken)
+                .expiresAt(expiration.toInstant())
+                .build();
     }
 
     public String extractUserId(Claims claims) {
