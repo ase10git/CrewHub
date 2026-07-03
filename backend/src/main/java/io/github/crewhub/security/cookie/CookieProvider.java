@@ -30,7 +30,7 @@ public class CookieProvider {
     @Value("${cookie.same-site}")
     private String sameSite;
 
-    private String REFRESH_TOKEN = "refreshToken";
+    private static final String REFRESH_TOKEN = "refreshToken";
 
     public ResponseCookie createRefreshTokenCookie(RefreshTokenInfo refreshTokenInfo) {
         ResponseCookie.ResponseCookieBuilder builder =
