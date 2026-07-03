@@ -77,10 +77,12 @@ public class JwtProvider {
                 now.getTime() + refreshTokenExpiration
         );
 
+        String jti = UUID.randomUUID().toString();
+
         String refreshToken = Jwts.builder()
                 .claims(claims)
                 .subject(String.valueOf(userId))
-                .id(UUID.randomUUID().toString())
+                .id(jti)
                 .issuedAt(now)
                 .expiration(expiration)
                 .signWith(getSigningKey())
@@ -88,7 +90,10 @@ public class JwtProvider {
 
         return RefreshTokenInfo.builder()
                 .refreshToken(refreshToken)
+                .jti(jti)
                 .expiresAt(expiration.toInstant())
+                .issuedAt(now.toInstant())
+                .ttlSeconds(refreshTokenExpiration/1000)
                 .build();
     }
 
@@ -135,13 +140,33 @@ public class JwtProvider {
         }
     }
 
-    public Claims parseRefreshToken(String token) {
+    public Claims parseAndValidateRefreshToken(String token) {
         try {
-            return Jwts.parser()
+            Claims claims = Jwts.parser()
                     .verifyWith(getSigningKey())
                     .build()
                     .parseSignedClaims(token)
                     .getPayload();
+
+            String type = extractTokenType(claims);
+
+            if (!"refresh".equals(type)) {
+                throw new BusinessException(ErrorCode.INVALID_REFRESH_TOKEN);
+            }
+
+            String userId = claims.getSubject();
+
+            if (userId == null || userId.isBlank()) {
+                throw new BusinessException(ErrorCode.INVALID_REFRESH_TOKEN);
+            }
+
+            String jti = claims.getId();
+
+            if (jti == null || jti.isBlank()) {
+                throw new BusinessException(ErrorCode.INVALID_REFRESH_TOKEN);
+            }
+
+            return claims;
         } catch (ExpiredJwtException e) {
             throw new BusinessException(ErrorCode.EXPIRED_REFRESH_TOKEN);
         } catch (MalformedJwtException |
@@ -171,36 +196,6 @@ public class JwtProvider {
         if (claims.getSubject() == null) {
             throw new BusinessException(ErrorCode.INVALID_ACCESS_TOKEN);
         }
-    }
-
-    public void validateRefreshToken(String token) {
-        Claims claims = parseRefreshToken(token);
-
-        String type = extractTokenType(claims);
-
-        if (!"refresh".equals(type)) {
-            throw new BusinessException(ErrorCode.INVALID_REFRESH_TOKEN);
-        }
-
-        if (claims.getSubject() == null) {
-            throw new BusinessException(ErrorCode.INVALID_REFRESH_TOKEN);
-        }
-
-        if (claims.getId() == null) {
-            throw new BusinessException(ErrorCode.INVALID_REFRESH_TOKEN);
-        }
-    }
-
-    public Date extractExpiration(Claims claims) {
-        return claims.getExpiration();
-    }
-
-    public Date extractIssuedAt(Claims claims) {
-        return claims.getIssuedAt();
-    }
-
-    public Long getRefreshTokenExpiration() {
-        return refreshTokenExpiration;
     }
 
     private SecretKey getSigningKey() {

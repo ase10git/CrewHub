@@ -2,6 +2,7 @@ package io.github.crewhub.utils;
 
 import org.springframework.stereotype.Component;
 
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.Date;
@@ -15,6 +16,12 @@ public class DateUtils {
     public LocalDateTime toLocalDateTime(Date date) {
         return date
                 .toInstant()
+                .atZone(ZoneOffset.UTC)
+                .toLocalDateTime();
+    }
+
+    public LocalDateTime toLocalDateTime(Instant instant) {
+        return instant
                 .atZone(ZoneOffset.UTC)
                 .toLocalDateTime();
     }

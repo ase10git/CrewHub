@@ -10,7 +10,6 @@ import org.springframework.http.ResponseCookie;
 import org.springframework.stereotype.Component;
 
 import java.time.Duration;
-import java.time.Instant;
 
 /**
  * Cookie 생성
@@ -32,26 +31,30 @@ public class CookieProvider {
 
     private static final String REFRESH_TOKEN = "refreshToken";
 
-    public ResponseCookie createRefreshTokenCookie(RefreshTokenInfo refreshTokenInfo) {
+    private ResponseCookie.ResponseCookieBuilder refreshTokenCookieBuilder(
+            String refreshToken, Duration maxAge
+    ) {
         ResponseCookie.ResponseCookieBuilder builder =
-                ResponseCookie.from(REFRESH_TOKEN, refreshTokenInfo.refreshToken())
+                ResponseCookie.from(REFRESH_TOKEN, refreshToken)
                 .httpOnly(httpOnly)
                 .secure(secure)
                 .domain("")
                 .path("/")
-                .maxAge(
-                        Duration.between(
-                                Instant.now(),
-                                refreshTokenInfo.expiresAt()
-                        )
-                )
+                .maxAge(maxAge)
                 .sameSite(sameSite);
 
         if (domain != null && !domain.isBlank()) {
             builder.domain(domain);
         }
 
-        return builder.build();
+        return builder;
+    }
+
+    public ResponseCookie createRefreshTokenCookie(RefreshTokenInfo refreshTokenInfo) {
+        return refreshTokenCookieBuilder(
+                refreshTokenInfo.refreshToken(),
+                Duration.ofSeconds(refreshTokenInfo.ttlSeconds())
+        ).build();
     }
 
     public String extractRefreshToken(HttpServletRequest request) {
@@ -71,19 +74,8 @@ public class CookieProvider {
     }
 
     public ResponseCookie deleteRefreshTokenCookie() {
-        ResponseCookie.ResponseCookieBuilder builder =
-                ResponseCookie.from(REFRESH_TOKEN, "")
-                .httpOnly(httpOnly)
-                .secure(secure)
-                .domain("")
-                .path("/")
-                .maxAge(0)
-                .sameSite(sameSite);
-
-        if (domain != null && !domain.isBlank()) {
-            builder.domain(domain);
-        }
-
-        return builder.build();
+        return refreshTokenCookieBuilder(
+                "", Duration.ZERO
+        ).build();
     }
 }

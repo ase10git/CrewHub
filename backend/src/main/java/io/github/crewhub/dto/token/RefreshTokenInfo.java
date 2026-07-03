@@ -10,6 +10,9 @@ import java.time.Instant;
 @Builder
 public record RefreshTokenInfo(
         String refreshToken,
-        Instant expiresAt
+        String jti,
+        Instant expiresAt,
+        Instant issuedAt,
+        Long ttlSeconds
 ) {
 }

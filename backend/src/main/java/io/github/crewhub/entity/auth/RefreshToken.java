@@ -31,6 +31,7 @@ public class RefreshToken {
 
     private String jti;
 
+    // 초 단위
     @TimeToLive
     private Long ttl;
 }
