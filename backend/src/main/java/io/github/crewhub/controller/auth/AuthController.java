@@ -11,10 +11,14 @@ import io.github.crewhub.security.cookie.CookieProvider;
 import io.github.crewhub.service.auth.AuthService;
 import io.github.crewhub.service.auth.TokenService;
 import io.github.crewhub.swagger.annotation.auth.AuthLoginApi;
+import io.github.crewhub.swagger.annotation.auth.AuthRefreshApi;
 import io.github.crewhub.swagger.annotation.auth.AuthRegisterApi;
 import io.github.crewhub.swagger.response.conflict.DuplicateUserResponse;
+import io.github.crewhub.swagger.response.notfound.UserNotFoundResponse;
 import io.github.crewhub.swagger.response.unauthorized.InvalidLoginResponse;
+import io.github.crewhub.swagger.response.unauthorized.InvalidTokenResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -62,8 +66,23 @@ public class AuthController {
         return authenticate(user, response);
     }
 
+    @AuthRefreshApi
+    @InvalidTokenResponse
+    @UserNotFoundResponse
+    @PostMapping("/refresh")
+    public ApiResponse<AuthResponse> refresh(
+            HttpServletRequest request,
+            HttpServletResponse response
+    ) {
+        String refreshToken = cookieProvider.extractRefreshToken(request);
+
+        AuthResult authResult = tokenService.refresh(refreshToken);
+
+        return responseWithToken(authResult, response);
+    }
+
     private ApiResponse<AuthResponse> authenticate(User user, HttpServletResponse response) {
-        AuthResult result = tokenService.issueAccessToken(user);
+        AuthResult result = tokenService.issueTokens(user);
 
         return responseWithToken(result, response);
     }
