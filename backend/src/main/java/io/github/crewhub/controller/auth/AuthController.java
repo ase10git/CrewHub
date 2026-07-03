@@ -4,15 +4,21 @@ import io.github.crewhub.common.response.ApiResponse;
 import io.github.crewhub.dto.auth.request.LoginRequest;
 import io.github.crewhub.dto.auth.request.SignUpRequest;
 import io.github.crewhub.dto.auth.response.LoginResponse;
+import io.github.crewhub.dto.auth.response.LoginResult;
 import io.github.crewhub.dto.auth.response.SignUpResponse;
+import io.github.crewhub.security.cookie.CookieProvider;
+import io.github.crewhub.security.jwt.JwtProvider;
 import io.github.crewhub.service.auth.AuthService;
 import io.github.crewhub.swagger.annotation.auth.AuthLoginApi;
 import io.github.crewhub.swagger.annotation.auth.AuthRegisterApi;
 import io.github.crewhub.swagger.response.conflict.DuplicateUserResponse;
 import io.github.crewhub.swagger.response.unauthorized.InvalidLoginResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.ResponseCookie;
 import org.springframework.web.bind.annotation.*;
 
 /**
@@ -27,14 +33,29 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 public class AuthController {
     private final AuthService authService;
+    private final CookieProvider cookieProvider;
+    private final JwtProvider jwtProvider;
 
     @AuthLoginApi
     @InvalidLoginResponse
     @PostMapping("/login")
     public ApiResponse<LoginResponse> login(
-            @Valid @RequestBody LoginRequest loginRequest
+            @Valid @RequestBody LoginRequest loginRequest,
+            HttpServletResponse response
             ) {
-        return ApiResponse.success(authService.login(loginRequest));
+        LoginResult result = authService.login(loginRequest);
+
+        ResponseCookie cookie = cookieProvider.createRefreshTokenCookie(
+                result.refreshToken(),
+                jwtProvider.getRefreshTokenExpiration()
+        );
+
+        response.addHeader(
+                HttpHeaders.SET_COOKIE,
+                cookie.toString()
+        );
+
+        return ApiResponse.success(result.loginResponse());
     }
 
     @AuthRegisterApi

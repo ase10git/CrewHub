@@ -4,6 +4,7 @@ import io.github.crewhub.common.exception.BusinessException;
 import io.github.crewhub.dto.auth.request.LoginRequest;
 import io.github.crewhub.dto.auth.request.SignUpRequest;
 import io.github.crewhub.dto.auth.response.LoginResponse;
+import io.github.crewhub.dto.auth.response.LoginResult;
 import io.github.crewhub.dto.auth.response.SignUpResponse;
 import io.github.crewhub.entity.auth.RefreshToken;
 import io.github.crewhub.entity.user.User;
@@ -32,14 +33,15 @@ import java.util.concurrent.TimeUnit;
 @Transactional(readOnly = true)
 public class AuthService {
     private final UserRepository userRepository;
+    private final TokenRepository tokenRepository;
+
     private final PasswordEncoder passwordEncoder;
     private final JwtProvider jwtProvider;
-    private final TokenRepository tokenRepository;
 
     private final DateUtils dateUtils;
     private final TokenHashUtils tokenHashUtils;
 
-    public LoginResponse login(LoginRequest request) {
+    public LoginResult login(LoginRequest request) {
         User user = userRepository.findByEmail(request.email()).orElseThrow(
                 () -> new BusinessException(ErrorCode.INVALID_LOGIN)
         );
@@ -52,12 +54,15 @@ public class AuthService {
 
         saveRefreshToken(user.getId(), refreshToken);
 
-        // Todo: Cookie에 Refresh Token 담기
-
-        return LoginResponse.builder()
+        LoginResponse response = LoginResponse.builder()
                 .userId(user.getId())
                 .username(user.getUsername())
                 .accessToken(accessToken)
+                .build();
+
+        return LoginResult.builder()
+                .loginResponse(response)
+                .refreshToken(refreshToken)
                 .build();
     }
 
