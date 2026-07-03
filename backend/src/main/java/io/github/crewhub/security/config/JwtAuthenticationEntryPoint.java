@@ -13,7 +13,7 @@ import org.springframework.stereotype.Component;
 import java.io.IOException;
 
 /**
- * Jwt인증 진입 설정 및 예외 처리
+ * JWT 인증 진입 설정 및 예외 처리
  */
 @Component
 @RequiredArgsConstructor

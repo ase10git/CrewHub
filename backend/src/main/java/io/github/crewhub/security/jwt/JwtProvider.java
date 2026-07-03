@@ -19,7 +19,9 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.function.Function;
 
-
+/**
+ * JWT Token 생성 및 검증
+ */
 @Component
 @RequiredArgsConstructor
 public class JwtProvider {

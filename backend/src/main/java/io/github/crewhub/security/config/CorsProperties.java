@@ -6,6 +6,9 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 
 import java.util.List;
 
+/**
+ * CORS 설정
+ */
 @Getter
 @Setter
 @ConfigurationProperties(prefix = "cors")
