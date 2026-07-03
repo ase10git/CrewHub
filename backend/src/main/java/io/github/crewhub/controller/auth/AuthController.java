@@ -6,6 +6,7 @@ import io.github.crewhub.dto.auth.request.SignUpRequest;
 import io.github.crewhub.dto.auth.response.LoginResponse;
 import io.github.crewhub.dto.auth.response.LoginResult;
 import io.github.crewhub.dto.auth.response.SignUpResponse;
+import io.github.crewhub.dto.auth.response.SignUpResult;
 import io.github.crewhub.security.cookie.CookieProvider;
 import io.github.crewhub.security.jwt.JwtProvider;
 import io.github.crewhub.service.auth.AuthService;
@@ -62,9 +63,22 @@ public class AuthController {
     @DuplicateUserResponse
     @PostMapping("/signup")
     public ApiResponse<SignUpResponse> signup(
-            @Valid @RequestBody SignUpRequest signUpRequest
+            @Valid @RequestBody SignUpRequest signUpRequest,
+            HttpServletResponse response
     ) {
-        return ApiResponse.success(authService.signup(signUpRequest));
+        SignUpResult result = authService.signup(signUpRequest);
+
+        ResponseCookie cookie = cookieProvider.createRefreshTokenCookie(
+                result.refreshToken(),
+                jwtProvider.getRefreshTokenExpiration()
+        );
+
+        response.addHeader(
+                HttpHeaders.SET_COOKIE,
+                cookie.toString()
+        );
+
+        return ApiResponse.success(result.signUpResponse());
     }
 
 }

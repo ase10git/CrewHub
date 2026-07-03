@@ -6,6 +6,7 @@ import io.github.crewhub.dto.auth.request.SignUpRequest;
 import io.github.crewhub.dto.auth.response.LoginResponse;
 import io.github.crewhub.dto.auth.response.LoginResult;
 import io.github.crewhub.dto.auth.response.SignUpResponse;
+import io.github.crewhub.dto.auth.response.SignUpResult;
 import io.github.crewhub.entity.auth.RefreshToken;
 import io.github.crewhub.entity.user.User;
 import io.github.crewhub.enums.common.ErrorCode;
@@ -67,7 +68,7 @@ public class AuthService {
     }
 
     @Transactional
-    public SignUpResponse signup(SignUpRequest request) {
+    public SignUpResult signup(SignUpRequest request) {
         validateDuplicateUser(request);
 
         User user = User.builder()
@@ -87,12 +88,15 @@ public class AuthService {
 
         saveRefreshToken(user.getId(), refreshToken);
 
-        // Todo: Cookie에 Refresh Token 담기
-
-        return SignUpResponse.builder()
+        SignUpResponse signUpResponse = SignUpResponse.builder()
                 .userId(savedUser.getId())
                 .username(savedUser.getUsername())
                 .accessToken(accessToken)
+                .build();
+
+        return SignUpResult.builder()
+                .signUpResponse(signUpResponse)
+                .refreshToken(refreshToken)
                 .build();
     }
 
