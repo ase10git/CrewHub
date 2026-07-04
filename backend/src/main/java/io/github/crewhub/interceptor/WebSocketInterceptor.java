@@ -48,7 +48,7 @@ public class WebSocketInterceptor implements ChannelInterceptor {
 
             String token = bearerToken.substring(7);
 
-            jwtProvider.validateAccessToken(token);
+            jwtProvider.parseAndValidateAccessToken(token);
 
             Integer userId = Integer.valueOf(jwtProvider.extractAccessTokenUserId(token));
 

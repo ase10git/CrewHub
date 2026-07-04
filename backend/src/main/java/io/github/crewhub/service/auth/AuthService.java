@@ -24,6 +24,8 @@ public class AuthService {
 
     private final PasswordEncoder passwordEncoder;
 
+    private final TokenService tokenService;
+
     public User login(LoginRequest request) {
         User user = userRepository.findByEmail(request.email()).orElseThrow(
                 () -> new BusinessException(ErrorCode.INVALID_LOGIN)
@@ -63,5 +65,10 @@ public class AuthService {
         if (!passwordEncoder.matches(rawPassword, encodedPassword)) {
             throw new BusinessException(ErrorCode.INVALID_LOGIN);
         }
+    }
+
+    @Transactional
+    public void logout(String userId) {
+        tokenService.deleteRefreshToken(userId);
     }
 }

@@ -122,4 +122,9 @@ public class TokenService {
 
         return issueTokens(user);
     }
+
+    @Transactional
+    public void deleteRefreshToken(String userId) {
+        tokenRepository.deleteById(userId);
+    }
 }

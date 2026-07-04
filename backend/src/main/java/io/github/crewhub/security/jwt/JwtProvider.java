@@ -10,7 +10,6 @@ import io.jsonwebtoken.security.Keys;
 import io.jsonwebtoken.security.SecurityException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
 import javax.crypto.SecretKey;
@@ -34,6 +33,8 @@ public class JwtProvider {
 
     @Value("${jwt.refresh-token-expiration}")
     private Long refreshTokenExpiration;
+
+    private static final String BEARER_TOKEN_PREFIX = "Bearer ";
 
     public String generateAccessToken(User user) {
         Map<String, Object> claims = new HashMap<>();
@@ -178,29 +179,39 @@ public class JwtProvider {
         }
     }
 
-    public void validateAccessToken(
-            String token,
-            UserDetails userDetails
-    ) {
-        Claims claims = parseAccessToken(token);
-        String userId = extractUserId(claims);
-
-        if (!userId.equals(userDetails.getUsername())) {
-            throw new BusinessException(ErrorCode.INVALID_ACCESS_TOKEN);
-        }
-    }
-
-    public void validateAccessToken(String token) {
+    public Claims parseAndValidateAccessToken(String token) {
         Claims claims = parseAccessToken(token);
 
         if (claims.getSubject() == null) {
             throw new BusinessException(ErrorCode.INVALID_ACCESS_TOKEN);
         }
+
+        return claims;
     }
 
     private SecretKey getSigningKey() {
         byte[] keyBytes = Decoders.BASE64.decode(secretKey);
 
         return Keys.hmacShaKeyFor(keyBytes);
+    }
+
+    public String extractBearerTokenAndUserId(String authorizationHeader) {
+        if (authorizationHeader == null || authorizationHeader.isBlank()) {
+            throw new BusinessException(ErrorCode.INVALID_ACCESS_TOKEN);
+        }
+
+        if (!authorizationHeader.startsWith(BEARER_TOKEN_PREFIX)) {
+            throw new BusinessException(ErrorCode.INVALID_ACCESS_TOKEN);
+        }
+
+        String accessToken = authorizationHeader.substring(BEARER_TOKEN_PREFIX.length());
+
+        if (accessToken.isBlank()) {
+            throw new BusinessException(ErrorCode.INVALID_ACCESS_TOKEN);
+        }
+
+        Claims claims = parseAndValidateAccessToken(accessToken);
+
+        return claims.getSubject();
     }
 }

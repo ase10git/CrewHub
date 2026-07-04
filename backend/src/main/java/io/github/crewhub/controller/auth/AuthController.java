@@ -8,6 +8,7 @@ import io.github.crewhub.dto.auth.response.AuthResult;
 import io.github.crewhub.dto.token.RefreshTokenInfo;
 import io.github.crewhub.entity.user.User;
 import io.github.crewhub.security.cookie.CookieProvider;
+import io.github.crewhub.security.jwt.JwtProvider;
 import io.github.crewhub.service.auth.AuthService;
 import io.github.crewhub.service.auth.TokenService;
 import io.github.crewhub.swagger.annotation.auth.AuthLoginApi;
@@ -41,6 +42,7 @@ public class AuthController {
     private final TokenService tokenService;
 
     private final CookieProvider cookieProvider;
+    private final JwtProvider jwtProvider;
 
     @AuthLoginApi
     @InvalidLoginResponse
@@ -105,4 +107,22 @@ public class AuthController {
         );
     }
 
+    @PostMapping("/logout")
+    public ApiResponse<String> logout(
+            @RequestHeader(HttpHeaders.AUTHORIZATION) String authorization,
+            HttpServletResponse response
+    ) {
+        String accessToken = jwtProvider.extractBearerTokenAndUserId(authorization);
+
+        authService.logout(accessToken);
+
+        ResponseCookie cookie = cookieProvider.deleteRefreshTokenCookie();
+
+        response.addHeader(
+                HttpHeaders.SET_COOKIE,
+                cookie.toString()
+        );
+
+        return ApiResponse.success("성공적으로 로그아웃했습니다.");
+    }
 }
