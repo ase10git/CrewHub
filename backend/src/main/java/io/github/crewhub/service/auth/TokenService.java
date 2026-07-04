@@ -8,8 +8,8 @@ import io.github.crewhub.entity.auth.RefreshToken;
 import io.github.crewhub.entity.user.User;
 import io.github.crewhub.enums.common.ErrorCode;
 import io.github.crewhub.repository.token.TokenRepository;
-import io.github.crewhub.repository.user.UserRepository;
 import io.github.crewhub.security.jwt.JwtProvider;
+import io.github.crewhub.service.user.UserService;
 import io.github.crewhub.utils.DateUtils;
 import io.github.crewhub.utils.TokenHashUtils;
 import io.jsonwebtoken.Claims;
@@ -27,7 +27,9 @@ import java.time.LocalDateTime;
 @Transactional(readOnly = true)
 public class TokenService {
     private final TokenRepository tokenRepository;
-    private final UserRepository userRepository;
+
+    private final UserService userService;
+
     private final JwtProvider jwtProvider;
 
     private final DateUtils dateUtils;
@@ -115,10 +117,7 @@ public class TokenService {
     public AuthResult refresh(String refreshToken) {
         RefreshToken refreshTokenEntity = validateRefreshToken(refreshToken);
 
-        User user = userRepository.findById(refreshTokenEntity.getUserId())
-                .orElseThrow(() ->
-                    new BusinessException(ErrorCode.USER_NOT_FOUND)
-                );
+        User user = userService.getUser(refreshTokenEntity.getUserId());
 
         return issueTokens(user);
     }
