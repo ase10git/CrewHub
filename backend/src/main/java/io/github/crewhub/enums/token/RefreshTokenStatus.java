@@ -15,7 +15,10 @@ import io.swagger.v3.oas.annotations.media.Schema;
                 """
 )
 public enum RefreshTokenStatus {
+    @Schema(description = "활성화된 Token")
     ACTIVE,
+    @Schema(description = "이미 사용된 Token")
     USED,
+    @Schema(description = "만료된 Token")
     REVOKED
 }
