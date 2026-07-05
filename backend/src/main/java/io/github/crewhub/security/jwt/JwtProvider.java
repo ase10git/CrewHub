@@ -10,6 +10,7 @@ import io.jsonwebtoken.security.Keys;
 import io.jsonwebtoken.security.SecurityException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
 import javax.crypto.SecretKey;
@@ -17,7 +18,6 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
-import java.util.function.Function;
 
 /**
  * JWT Token 생성 및 검증
@@ -105,10 +105,6 @@ public class JwtProvider {
         return claims.getSubject();
     }
 
-    public String extractAccessTokenUserId(String token) {
-        return parseAccessToken(token).getSubject();
-    }
-
     public String extractJti(Claims claims) {
         return claims.getId();
     }
@@ -117,22 +113,36 @@ public class JwtProvider {
         return claims.get("type", String.class);
     }
 
-    public <T> T extractClaim(
-            String token,
-            Function<Claims, T> resolver
+    public void validateTokenUser(
+            String userId,
+            UserDetails userDetails
     ) {
-        Claims claims = parseAccessToken(token);
-
-        return resolver.apply(claims);
+        if (!userId.equals(userDetails.getUsername())) {
+            throw new BusinessException(ErrorCode.INVALID_ACCESS_TOKEN);
+        }
     }
 
-    private Claims parseAccessToken(String token) {
+    public Claims parseAndValidateAccessToken(String token) {
         try {
-            return Jwts.parser()
+            Claims claims = Jwts.parser()
                     .verifyWith(getSigningKey())
                     .build()
                     .parseSignedClaims(token)
                     .getPayload();
+
+            String userId = claims.getSubject();
+
+            if (userId == null || userId.isBlank()) {
+                throw new BusinessException(ErrorCode.INVALID_ACCESS_TOKEN);
+            }
+
+            String jti = claims.getId();
+
+            if (jti == null || jti.isBlank()) {
+                throw new BusinessException(ErrorCode.INVALID_ACCESS_TOKEN);
+            }
+
+            return claims;
         } catch (ExpiredJwtException e) {
             throw new BusinessException(ErrorCode.EXPIRED_ACCESS_TOKEN);
         } catch (MalformedJwtException |
@@ -182,16 +192,6 @@ public class JwtProvider {
         }
     }
 
-    public Claims parseAndValidateAccessToken(String token) {
-        Claims claims = parseAccessToken(token);
-
-        if (claims.getSubject() == null) {
-            throw new BusinessException(ErrorCode.INVALID_ACCESS_TOKEN);
-        }
-
-        return claims;
-    }
-
     private SecretKey getSigningKey() {
         byte[] keyBytes = Decoders.BASE64.decode(secretKey);
 
@@ -216,5 +216,9 @@ public class JwtProvider {
         return accessToken;
     }
 
+    public long getRemainingAccessTokenTtl(Claims claims) {
+        long remainMillis = claims.getExpiration().getTime() - System.currentTimeMillis();
 
+        return Math.max(remainMillis / 1000, 0);
+    }
 }

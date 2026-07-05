@@ -4,6 +4,7 @@ import io.github.crewhub.common.exception.BusinessException;
 import io.github.crewhub.dto.auth.response.AuthResponse;
 import io.github.crewhub.dto.auth.response.AuthResult;
 import io.github.crewhub.dto.token.RefreshTokenInfo;
+import io.github.crewhub.entity.auth.AccessTokenBlacklist;
 import io.github.crewhub.entity.auth.RefreshToken;
 import io.github.crewhub.entity.user.User;
 import io.github.crewhub.enums.common.ErrorCode;
@@ -125,16 +126,32 @@ public class TokenService {
     }
 
     @Transactional
-    public void deleteRefreshToken(String accessToken) {
+    public void saveBlacklistAndDeleteRefreshToken(String accessToken) {
         Claims claims = jwtProvider.parseAndValidateAccessToken(accessToken);
+        saveAccessTokenBlacklist(claims);
 
         String userId = jwtProvider.extractUserId(claims);
+        deleteRefreshToken(userId);
+    }
+
+    @Transactional
+    public void deleteRefreshToken(String userId) {
         tokenRepository.deleteById(userId);
     }
 
-    public void validateAccessTokenBlacklist(String jti) {
+    public void checkAccessTokenBlacklist(String jti) {
         if (blacklistRepository.existsById(jti)) {
             throw new BusinessException(ErrorCode.INVALID_ACCESS_TOKEN);
         }
+    }
+
+    @Transactional
+    public void saveAccessTokenBlacklist(Claims claims) {
+        AccessTokenBlacklist blacklist = AccessTokenBlacklist.builder()
+                .jti(jwtProvider.extractJti(claims))
+                .ttl(jwtProvider.getRemainingAccessTokenTtl(claims))
+                .build();
+
+        blacklistRepository.save(blacklist);
     }
 }

@@ -55,7 +55,7 @@ public class JwtAuthenticationFilter  extends OncePerRequestFilter {
 
             Claims claims = jwtProvider.parseAndValidateAccessToken(accessToken);
 
-            tokenService.validateAccessTokenBlacklist(
+            tokenService.checkAccessTokenBlacklist(
                     jwtProvider.extractJti(claims)
             );
 
@@ -67,10 +67,11 @@ public class JwtAuthenticationFilter  extends OncePerRequestFilter {
                     .getAuthentication() == null) {
 
                 UserDetails userDetails
-                        = this
-                        .userDetailsService
+                        = userDetailsService
                         .loadUserByUsername(userId);
 
+                jwtProvider.validateTokenUser(userId, userDetails);
+                
                 UsernamePasswordAuthenticationToken authToken
                         = new UsernamePasswordAuthenticationToken(
                         userDetails,
