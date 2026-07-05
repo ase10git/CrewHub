@@ -21,6 +21,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 /**
  * Token 발급, 저장, 관리 서비스
@@ -56,6 +57,12 @@ public class TokenService {
                 .authResponse(authResponse)
                 .refreshTokenInfo(refreshTokenInfo)
                 .build();
+    }
+
+    public AuthResult issueFirstTokens(User user) {
+        String refreshTokenFamilyId = UUID.randomUUID().toString();
+
+        return issueTokens(user, refreshTokenFamilyId);
     }
 
     private RefreshToken createRefreshTokenEntity(
@@ -99,15 +106,18 @@ public class TokenService {
         refreshTokenRepository.save(token);
     }
 
-    public RefreshToken validateRefreshToken(String refreshToken) {
-        Claims claims = jwtProvider.parseAndValidateRefreshToken(refreshToken);
+    public RefreshToken validateRefreshToken(RefreshToken savedToken, String refreshToken) {
+        if (savedToken.getStatus()
+                .equals(RefreshTokenStatus.USED)) {
+            revokeAllFamilyRefreshToken(savedToken.getFamilyId());
 
-        String jti = jwtProvider.extractJti(claims);
+            throw new BusinessException(ErrorCode.INVALID_REFRESH_TOKEN);
+        }
 
-        RefreshToken savedToken = refreshTokenRepository.findById(jti)
-                .orElseThrow(() -> new BusinessException(
-                        ErrorCode.INVALID_REFRESH_TOKEN
-                ));
+        if (savedToken.getStatus()
+                .equals(RefreshTokenStatus.REVOKED)) {
+            throw new BusinessException(ErrorCode.INVALID_REFRESH_TOKEN);
+        }
 
         if (!tokenHashUtils.matches(
                 refreshToken, savedToken.getRefreshTokenHash()
@@ -122,26 +132,58 @@ public class TokenService {
         return savedToken;
     }
 
+    @Transactional
     public AuthResult refresh(String refreshToken) {
-        RefreshToken refreshTokenEntity = validateRefreshToken(refreshToken);
+        Claims claims = jwtProvider.parseAndValidateRefreshToken(refreshToken);
 
-        User user = userService.getUser(refreshTokenEntity.getUserId());
+        String jti = jwtProvider.extractJti(claims);
 
-        return issueTokens(user, refreshTokenEntity.getFamilyId());
+        RefreshToken savedToken = refreshTokenRepository.findById(jti)
+                .orElseThrow(() -> new BusinessException(
+                        ErrorCode.INVALID_REFRESH_TOKEN
+                ));
+
+        validateRefreshToken(savedToken, refreshToken);
+
+        User user = userService.getUser(savedToken.getUserId());
+
+        AuthResult authResult = issueTokens(user, savedToken.getFamilyId());
+
+        savedToken.changeStatus(RefreshTokenStatus.USED);
+        refreshTokenRepository.save(savedToken);
+
+        return authResult;
     }
 
     @Transactional
-    public void saveBlacklistAndDeleteRefreshToken(String accessToken) {
+    public void saveBlacklistAndMarkRefreshTokenRevoked(String accessToken) {
         Claims claims = jwtProvider.parseAndValidateAccessToken(accessToken);
         saveAccessTokenBlacklist(claims);
 
         String jti = jwtProvider.extractJti(claims);
-        deleteRefreshToken(jti);
+        markRefreshTokenRevoked(jti);
     }
 
     @Transactional
-    public void deleteRefreshToken(String jti) {
-        refreshTokenRepository.deleteById(jti);
+    public void markRefreshTokenRevoked(String jti) {
+        refreshTokenRepository.findById(jti)
+                .ifPresent(
+                        token -> {
+                            token.changeStatus(RefreshTokenStatus.REVOKED);
+                            refreshTokenRepository.save(token);
+                        }
+                );
+    }
+
+    @Transactional
+    public void revokeAllFamilyRefreshToken(String familyId) {
+        refreshTokenRepository.findAllByFamilyId(familyId)
+                .forEach(token -> {
+                    if (!token.getStatus().equals(RefreshTokenStatus.REVOKED)) {
+                        token.changeStatus(RefreshTokenStatus.REVOKED);
+                    }
+                    refreshTokenRepository.save(token);
+                });
     }
 
     public void checkAccessTokenBlacklist(String jti) {

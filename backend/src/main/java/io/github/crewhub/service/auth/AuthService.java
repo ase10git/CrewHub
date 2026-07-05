@@ -69,6 +69,6 @@ public class AuthService {
 
     @Transactional
     public void logout(String accessToken) {
-        tokenService.saveBlacklistAndDeleteRefreshToken(accessToken);
+        tokenService.saveBlacklistAndMarkRefreshTokenRevoked(accessToken);
     }
 }

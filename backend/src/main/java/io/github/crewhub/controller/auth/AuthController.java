@@ -27,8 +27,6 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseCookie;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.UUID;
-
 /**
  * 인증 인가 컨트롤러
  */
@@ -55,9 +53,7 @@ public class AuthController {
             ) {
         User user = authService.login(loginRequest);
 
-        String refreshTokenFamilyId = UUID.randomUUID().toString();
-
-        return authenticate(user, refreshTokenFamilyId, response);
+        return authenticate(user, response);
     }
 
     @AuthRegisterApi
@@ -68,10 +64,7 @@ public class AuthController {
             HttpServletResponse response
     ) {
         User user = authService.signup(signUpRequest);
-
-        String refreshTokenFamilyId = UUID.randomUUID().toString();
-
-        return authenticate(user, refreshTokenFamilyId, response);
+        return authenticate(user, response);
     }
 
     @AuthRefreshApi
@@ -91,10 +84,9 @@ public class AuthController {
 
     private ApiResponse<AuthResponse> authenticate(
             User user,
-            String familyId,
             HttpServletResponse response
     ) {
-        AuthResult result = tokenService.issueTokens(user, familyId);
+        AuthResult result = tokenService.issueFirstTokens(user);
 
         return responseWithToken(result, response);
     }
