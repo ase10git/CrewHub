@@ -68,7 +68,7 @@ public class AuthService {
     }
 
     @Transactional
-    public void logout(String userId) {
-        tokenService.deleteRefreshToken(userId);
+    public void logout(String accessToken) {
+        tokenService.deleteRefreshToken(accessToken);
     }
 }

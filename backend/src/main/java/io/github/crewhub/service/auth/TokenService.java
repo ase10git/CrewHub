@@ -7,6 +7,7 @@ import io.github.crewhub.dto.token.RefreshTokenInfo;
 import io.github.crewhub.entity.auth.RefreshToken;
 import io.github.crewhub.entity.user.User;
 import io.github.crewhub.enums.common.ErrorCode;
+import io.github.crewhub.repository.token.AccessTokenBlacklistRepository;
 import io.github.crewhub.repository.token.TokenRepository;
 import io.github.crewhub.security.jwt.JwtProvider;
 import io.github.crewhub.service.user.UserService;
@@ -27,6 +28,7 @@ import java.time.LocalDateTime;
 @Transactional(readOnly = true)
 public class TokenService {
     private final TokenRepository tokenRepository;
+    private final AccessTokenBlacklistRepository blacklistRepository;
 
     private final UserService userService;
 
@@ -123,7 +125,16 @@ public class TokenService {
     }
 
     @Transactional
-    public void deleteRefreshToken(String userId) {
+    public void deleteRefreshToken(String accessToken) {
+        Claims claims = jwtProvider.parseAndValidateAccessToken(accessToken);
+
+        String userId = jwtProvider.extractUserId(claims);
         tokenRepository.deleteById(userId);
+    }
+
+    public void validateAccessTokenBlacklist(String jti) {
+        if (blacklistRepository.existsById(jti)) {
+            throw new BusinessException(ErrorCode.INVALID_ACCESS_TOKEN);
+        }
     }
 }

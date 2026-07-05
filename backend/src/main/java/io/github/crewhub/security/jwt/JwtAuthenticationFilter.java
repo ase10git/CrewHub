@@ -2,6 +2,8 @@ package io.github.crewhub.security.jwt;
 
 import io.github.crewhub.common.exception.BusinessException;
 import io.github.crewhub.security.details.CustomUserDetailsService;
+import io.github.crewhub.service.auth.TokenService;
+import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -26,6 +28,7 @@ import java.io.IOException;
 public class JwtAuthenticationFilter  extends OncePerRequestFilter {
     private final JwtProvider jwtProvider;
     private final CustomUserDetailsService userDetailsService;
+    private final TokenService tokenService;
 
     @Override
     protected boolean shouldNotFilter(
@@ -48,7 +51,15 @@ public class JwtAuthenticationFilter  extends OncePerRequestFilter {
         final String authHeader = request.getHeader("Authorization");
 
         try {
-            String userId = jwtProvider.extractBearerTokenAndUserId(authHeader);
+            String accessToken = jwtProvider.extractBearerToken(authHeader);
+
+            Claims claims = jwtProvider.parseAndValidateAccessToken(accessToken);
+
+            tokenService.validateAccessTokenBlacklist(
+                    jwtProvider.extractJti(claims)
+            );
+
+            String userId = jwtProvider.extractUserId(claims);
 
             if (userId != null
                     && SecurityContextHolder

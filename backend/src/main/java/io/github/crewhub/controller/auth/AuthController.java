@@ -112,7 +112,7 @@ public class AuthController {
             @RequestHeader(HttpHeaders.AUTHORIZATION) String authorization,
             HttpServletResponse response
     ) {
-        String accessToken = jwtProvider.extractBearerTokenAndUserId(authorization);
+        String accessToken = jwtProvider.extractBearerToken(authorization);
 
         authService.logout(accessToken);
 

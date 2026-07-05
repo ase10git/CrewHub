@@ -198,7 +198,7 @@ public class JwtProvider {
         return Keys.hmacShaKeyFor(keyBytes);
     }
 
-    public String extractBearerTokenAndUserId(String authorizationHeader) {
+    public String extractBearerToken(String authorizationHeader) {
         if (authorizationHeader == null || authorizationHeader.isBlank()) {
             throw new BusinessException(ErrorCode.INVALID_ACCESS_TOKEN);
         }
@@ -213,8 +213,8 @@ public class JwtProvider {
             throw new BusinessException(ErrorCode.INVALID_ACCESS_TOKEN);
         }
 
-        Claims claims = parseAndValidateAccessToken(accessToken);
-
-        return claims.getSubject();
+        return accessToken;
     }
+
+
 }
