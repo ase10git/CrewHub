@@ -55,9 +55,12 @@ public class JwtProvider {
                 now.getTime() + accessTokenExpiration
         );
 
+        String jti = UUID.randomUUID().toString();
+
         return Jwts.builder()
                 .claims(claims)
                 .subject(String.valueOf(user.getId()))
+                .id(jti)
                 .issuedAt(now)
                 .expiration(expiration)
                 .signWith(getSigningKey())
