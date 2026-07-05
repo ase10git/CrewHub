@@ -13,9 +13,7 @@ spring:
       database: ${REDIS_DATABASE}
       host: ${REDIS_LOCAL_HOST}
       port: ${REDIS_PORT}
-      password: ${REDIS_LOCAL_PASSWORD}
       timeout: ${REDIS_TIMEOUT}
-
   jpa:
     hibernate:
       ddl-auto: update

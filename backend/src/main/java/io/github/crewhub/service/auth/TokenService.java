@@ -17,11 +17,14 @@ import io.github.crewhub.utils.DateUtils;
 import io.github.crewhub.utils.TokenHashUtils;
 import io.jsonwebtoken.Claims;
 import lombok.RequiredArgsConstructor;
+import org.redisson.api.RLock;
+import org.redisson.api.RedissonClient;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Token 발급, 저장, 관리 서비스
@@ -39,6 +42,10 @@ public class TokenService {
 
     private final DateUtils dateUtils;
     private final TokenHashUtils tokenHashUtils;
+
+    private final RedissonClient redissonClient;
+
+    private static final String REFRESH_LOCK_KEY_PREFIX = "refresh-lock:";
 
     public AuthResult issueTokens(User user, String familyId) {
         String accessToken = jwtProvider.generateAccessToken(user);
@@ -138,21 +145,40 @@ public class TokenService {
 
         String jti = jwtProvider.extractJti(claims);
 
-        RefreshToken savedToken = refreshTokenRepository.findById(jti)
-                .orElseThrow(() -> new BusinessException(
-                        ErrorCode.INVALID_REFRESH_TOKEN
-                ));
+        RLock lock = redissonClient.getLock(REFRESH_LOCK_KEY_PREFIX + jti);
 
-        validateRefreshToken(savedToken, refreshToken);
+        try {
+            boolean locked = lock.tryLock(3, 10, TimeUnit.SECONDS);
 
-        User user = userService.getUser(savedToken.getUserId());
+            if (!locked) {
+                throw new BusinessException(ErrorCode.INVALID_REFRESH_TOKEN);
+            }
 
-        AuthResult authResult = issueTokens(user, savedToken.getFamilyId());
+            RefreshToken savedToken = refreshTokenRepository.findById(jti)
+                    .orElseThrow(() -> new BusinessException(
+                            ErrorCode.INVALID_REFRESH_TOKEN
+                    ));
 
-        savedToken.changeStatus(RefreshTokenStatus.USED);
-        refreshTokenRepository.save(savedToken);
+            validateRefreshToken(savedToken, refreshToken);
 
-        return authResult;
+            User user = userService.getUser(savedToken.getUserId());
+
+            AuthResult authResult = issueTokens(user, savedToken.getFamilyId());
+
+            savedToken.changeStatus(RefreshTokenStatus.USED);
+            refreshTokenRepository.save(savedToken);
+
+            return authResult;
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+
+            throw new BusinessException(ErrorCode.INTERNAL_SERVER_ERROR);
+        } finally {
+            if (lock.isHeldByCurrentThread()) {
+                lock.unlock();
+            }
+        }
+
     }
 
     @Transactional
