@@ -8,6 +8,7 @@ import io.github.crewhub.entity.auth.AccessTokenBlacklist;
 import io.github.crewhub.entity.auth.RefreshToken;
 import io.github.crewhub.entity.user.User;
 import io.github.crewhub.enums.common.ErrorCode;
+import io.github.crewhub.enums.token.RefreshTokenStatus;
 import io.github.crewhub.repository.token.AccessTokenBlacklistRepository;
 import io.github.crewhub.repository.token.RefreshTokenRepository;
 import io.github.crewhub.security.jwt.JwtProvider;
@@ -38,12 +39,12 @@ public class TokenService {
     private final DateUtils dateUtils;
     private final TokenHashUtils tokenHashUtils;
 
-    public AuthResult issueTokens(User user) {
+    public AuthResult issueTokens(User user, String familyId) {
         String accessToken = jwtProvider.generateAccessToken(user);
 
         RefreshTokenInfo refreshTokenInfo = jwtProvider.generateRefreshToken(user.getId());
 
-        saveRefreshToken(user.getId(), refreshTokenInfo);
+        saveRefreshToken(user.getId(), familyId, refreshTokenInfo);
 
         AuthResponse authResponse = AuthResponse.builder()
                 .userId(user.getId())
@@ -57,7 +58,11 @@ public class TokenService {
                 .build();
     }
 
-    private RefreshToken createRefreshTokenEntity(Integer userId, RefreshTokenInfo refreshTokenInfo) {
+    private RefreshToken createRefreshTokenEntity(
+            Integer userId,
+            String familyId,
+            RefreshTokenInfo refreshTokenInfo
+    ) {
         String refreshToken = refreshTokenInfo.refreshToken();
 
         String hashedRefreshToken = tokenHashUtils.hash(refreshToken);
@@ -74,7 +79,9 @@ public class TokenService {
         return RefreshToken.builder()
                 .jti(refreshTokenInfo.jti())
                 .userId(userId)
+                .familyId(familyId)
                 .refreshTokenHash(hashedRefreshToken)
+                .status(RefreshTokenStatus.ACTIVE)
                 .issuedAt(issuedAt)
                 .expiredAt(expiredAt)
                 .ttl(ttl)
@@ -82,8 +89,12 @@ public class TokenService {
     }
 
     @Transactional
-    public void saveRefreshToken(Integer userId, RefreshTokenInfo refreshTokenInfo) {
-        RefreshToken token = createRefreshTokenEntity(userId, refreshTokenInfo);
+    public void saveRefreshToken(
+            Integer userId,
+            String familyId,
+            RefreshTokenInfo refreshTokenInfo
+    ) {
+        RefreshToken token = createRefreshTokenEntity(userId, familyId, refreshTokenInfo);
 
         refreshTokenRepository.save(token);
     }
@@ -116,7 +127,7 @@ public class TokenService {
 
         User user = userService.getUser(refreshTokenEntity.getUserId());
 
-        return issueTokens(user);
+        return issueTokens(user, refreshTokenEntity.getFamilyId());
     }
 
     @Transactional
