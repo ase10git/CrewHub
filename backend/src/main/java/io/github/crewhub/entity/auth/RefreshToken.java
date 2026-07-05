@@ -41,4 +41,8 @@ public class RefreshToken {
     // 초 단위
     @TimeToLive
     private Long ttl;
+
+    public void changeStatus(RefreshTokenStatus status) {
+        this.status = status;
+    }
 }
