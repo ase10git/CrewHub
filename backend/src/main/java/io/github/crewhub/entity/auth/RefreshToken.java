@@ -1,5 +1,6 @@
 package io.github.crewhub.entity.auth;
 
+import io.github.crewhub.enums.token.RefreshTokenStatus;
 import lombok.*;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.redis.core.RedisHash;
@@ -20,16 +21,22 @@ import java.time.LocalDateTime;
 public class RefreshToken {
 
     @Id
+    private String jti;
+
+    @Indexed
     private Integer userId;
+
+    @Indexed
+    private String familyId;
 
     @Indexed
     private String refreshTokenHash;
 
+    private RefreshTokenStatus status;
+
     private LocalDateTime expiredAt;
 
     private LocalDateTime issuedAt;
-
-    private String jti;
 
     // 초 단위
     @TimeToLive

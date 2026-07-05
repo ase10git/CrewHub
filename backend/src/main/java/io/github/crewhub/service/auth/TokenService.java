@@ -9,7 +9,7 @@ import io.github.crewhub.entity.auth.RefreshToken;
 import io.github.crewhub.entity.user.User;
 import io.github.crewhub.enums.common.ErrorCode;
 import io.github.crewhub.repository.token.AccessTokenBlacklistRepository;
-import io.github.crewhub.repository.token.TokenRepository;
+import io.github.crewhub.repository.token.RefreshTokenRepository;
 import io.github.crewhub.security.jwt.JwtProvider;
 import io.github.crewhub.service.user.UserService;
 import io.github.crewhub.utils.DateUtils;
@@ -28,7 +28,7 @@ import java.time.LocalDateTime;
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
 public class TokenService {
-    private final TokenRepository tokenRepository;
+    private final RefreshTokenRepository refreshTokenRepository;
     private final AccessTokenBlacklistRepository blacklistRepository;
 
     private final UserService userService;
@@ -72,10 +72,10 @@ public class TokenService {
         Long ttl = refreshTokenInfo.ttlSeconds();
 
         return RefreshToken.builder()
+                .jti(refreshTokenInfo.jti())
                 .userId(userId)
                 .refreshTokenHash(hashedRefreshToken)
                 .issuedAt(issuedAt)
-                .jti(refreshTokenInfo.jti())
                 .expiredAt(expiredAt)
                 .ttl(ttl)
                 .build();
@@ -85,27 +85,21 @@ public class TokenService {
     public void saveRefreshToken(Integer userId, RefreshTokenInfo refreshTokenInfo) {
         RefreshToken token = createRefreshTokenEntity(userId, refreshTokenInfo);
 
-        tokenRepository.save(token);
+        refreshTokenRepository.save(token);
     }
 
     public RefreshToken validateRefreshToken(String refreshToken) {
         Claims claims = jwtProvider.parseAndValidateRefreshToken(refreshToken);
 
-        String userId = jwtProvider.extractUserId(claims);
+        String jti = jwtProvider.extractJti(claims);
 
-        RefreshToken savedToken = tokenRepository.findById(userId)
+        RefreshToken savedToken = refreshTokenRepository.findById(jti)
                 .orElseThrow(() -> new BusinessException(
                         ErrorCode.INVALID_REFRESH_TOKEN
                 ));
 
         if (!tokenHashUtils.matches(
                 refreshToken, savedToken.getRefreshTokenHash()
-        )) {
-            throw new BusinessException(ErrorCode.INVALID_REFRESH_TOKEN);
-        }
-
-        if (!savedToken.getJti().equals(
-                jwtProvider.extractJti(claims)
         )) {
             throw new BusinessException(ErrorCode.INVALID_REFRESH_TOKEN);
         }
@@ -130,13 +124,13 @@ public class TokenService {
         Claims claims = jwtProvider.parseAndValidateAccessToken(accessToken);
         saveAccessTokenBlacklist(claims);
 
-        String userId = jwtProvider.extractUserId(claims);
-        deleteRefreshToken(userId);
+        String jti = jwtProvider.extractJti(claims);
+        deleteRefreshToken(jti);
     }
 
     @Transactional
-    public void deleteRefreshToken(String userId) {
-        tokenRepository.deleteById(userId);
+    public void deleteRefreshToken(String jti) {
+        refreshTokenRepository.deleteById(jti);
     }
 
     public void checkAccessTokenBlacklist(String jti) {

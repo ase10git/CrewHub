@@ -9,5 +9,5 @@ import org.springframework.stereotype.Repository;
  * 객체(Entity) 중심의 CRUD 관리 시 사용
  */
 @Repository
-public interface TokenRepository extends ListCrudRepository<RefreshToken, String> {
+public interface RefreshTokenRepository extends ListCrudRepository<RefreshToken, String> {
 }
