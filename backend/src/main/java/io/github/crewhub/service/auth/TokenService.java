@@ -153,8 +153,10 @@ public class TokenService {
 
         RLock lock = redissonClient.getLock(REFRESH_LOCK_KEY_PREFIX + jti);
 
+        boolean locked = false;
+
         try {
-            boolean locked = lock.tryLock(3, 10, TimeUnit.SECONDS);
+            locked = lock.tryLock(3, 10, TimeUnit.SECONDS);
 
             if (!locked) {
                 throw new BusinessException(ErrorCode.INVALID_REFRESH_TOKEN);
@@ -169,18 +171,16 @@ public class TokenService {
 
             User user = userService.getUser(savedToken.getUserId());
 
-            AuthResult authResult = issueTokens(user, savedToken.getFamilyId());
-
             savedToken.changeStatus(RefreshTokenStatus.USED);
             refreshTokenRepository.save(savedToken);
 
-            return authResult;
+            return issueTokens(user, savedToken.getFamilyId());
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
 
             throw new BusinessException(ErrorCode.INTERNAL_SERVER_ERROR);
         } finally {
-            if (lock.isHeldByCurrentThread()) {
+            if (locked && lock.isHeldByCurrentThread()) {
                 lock.unlock();
             }
         }
