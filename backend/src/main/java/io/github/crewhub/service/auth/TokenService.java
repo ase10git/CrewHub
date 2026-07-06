@@ -60,7 +60,7 @@ public class TokenService {
 
         saveRefreshToken(user.getId(), familyId, refreshTokenInfo);
 
-        CsrfTokenInfo csrfTokenInfo = csrfTokenProvider.generate(refreshTokenInfo.ttlSeconds());
+        CsrfTokenInfo csrfTokenInfo = csrfTokenProvider.generate(refreshTokenInfo);
 
         AuthResponse authResponse = AuthResponse.builder()
                 .userId(user.getId())
@@ -150,13 +150,13 @@ public class TokenService {
 
     @Transactional
     public AuthResult refresh(HttpServletRequest request) {
-        validateCsrfToken(request);
-
         String refreshToken = cookieProvider.extractRefreshTokenCookie(request);
 
         Claims claims = jwtProvider.parseAndValidateRefreshToken(refreshToken);
 
         String jti = jwtProvider.extractJti(claims);
+
+        validateCsrfToken(request, jti);
 
         RLock lock = redissonClient.getLock(REFRESH_LOCK_KEY_PREFIX + jti);
 
@@ -241,10 +241,10 @@ public class TokenService {
         blacklistRepository.save(blacklist);
     }
 
-    public void validateCsrfToken(HttpServletRequest request) {
+    public void validateCsrfToken(HttpServletRequest request, String jti) {
         String cookieToken = cookieProvider.extractCsrfTokenCookie(request);
         String headerToken = cookieProvider.extractCsrfHeader(request);
 
-        csrfTokenProvider.validateCsrfToken(cookieToken, headerToken);
+        csrfTokenProvider.validateCsrfToken(cookieToken, headerToken, jti);
     }
 }

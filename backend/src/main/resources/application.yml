@@ -20,6 +20,9 @@ jwt:
   access-token-expiration: ${JWT_ACCESS_TOKEN_EXPIRE}
   refresh-token-expiration: ${JWT_REFRESH_TOKEN_EXPIRE}
 
+csrf:
+  secret-key: ${CSRF_SECRET}
+
 cookie:
   refresh-token:
     secure: ${REFRESH_TOKEN_COOKIE_SECURE}
