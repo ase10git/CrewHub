@@ -21,10 +21,16 @@ jwt:
   refresh-token-expiration: ${JWT_REFRESH_TOKEN_EXPIRE}
 
 cookie:
-  secure: ${COOKIE_SECURE}
-  http-only: ${COOKIE_HTTPONLY}
-  same-site: ${COOKIE_SAME_SITE}
-  domain: ${COOKIE_DOMAIN}
+  refresh-token:
+    secure: ${REFRESH_TOKEN_COOKIE_SECURE}
+    http-only: ${REFRESH_TOKEN_COOKIE_HTTPONLY}
+    same-site: ${REFRESH_TOKEN_COOKIE_SAME_SITE}
+    domain: ${REFRESH_TOKEN_COOKIE_DOMAIN}
+  csrf-token:
+    secure: ${CSRF_TOKEN_COOKIE_SECURE}
+    http-only: ${CSRF_TOKEN_COOKIE_HTTPONLY}
+    same-site: ${CSRF_TOKEN_COOKIE_SAME_SITE}
+    domain: ${CSRF_TOKEN_COOKIE_DOMAIN}
 
 springdoc:
   api-docs:

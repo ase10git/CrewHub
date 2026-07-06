@@ -17,34 +17,49 @@ import java.time.Duration;
 @Component
 public class CookieProvider {
 
-    @Value("${cookie.secure}")
-    private boolean secure;
+    @Value("${cookie.refresh-token.secure}")
+    private boolean refreshTokenSecure;
 
-    @Value("${cookie.http-only}")
-    private boolean httpOnly;
+    @Value("${cookie.refresh-token.http-only}")
+    private boolean refreshTokenHttpOnly;
 
-    @Value("${cookie.domain}")
-    private String domain;
+    @Value("${cookie.refresh-token.domain}")
+    private String refreshTokenDomain;
 
-    @Value("${cookie.same-site}")
-    private String sameSite;
+    @Value("${cookie.refresh-token.same-site}")
+    private String refreshTokenSameSite;
+
+    @Value("${cookie.csrf-token.secure}")
+    private boolean csrfTokenSecure;
+
+    @Value("${cookie.csrf-token.http-only}")
+    private boolean csrfTokenHttpOnly;
+
+    @Value("${cookie.csrf-token.domain}")
+    private String csrfTokenDomain;
+
+    @Value("${cookie.csrf-token.same-site}")
+    private String csrfTokenSameSite;
 
     private static final String REFRESH_TOKEN = "refreshToken";
+
+    private static final String CSRF_TOKEN = "csrfToken";
 
     private ResponseCookie.ResponseCookieBuilder refreshTokenCookieBuilder(
             String refreshToken, Duration maxAge
     ) {
+
         ResponseCookie.ResponseCookieBuilder builder =
                 ResponseCookie.from(REFRESH_TOKEN, refreshToken)
-                .httpOnly(httpOnly)
-                .secure(secure)
+                .httpOnly(refreshTokenHttpOnly)
+                .secure(refreshTokenSecure)
+                .path("/api/auth/refresh")
                 .domain("")
-                .path("/")
                 .maxAge(maxAge)
-                .sameSite(sameSite);
+                .sameSite(refreshTokenSameSite);
 
-        if (domain != null && !domain.isBlank()) {
-            builder.domain(domain);
+        if (refreshTokenDomain != null && !refreshTokenDomain.isBlank()) {
+            builder.domain(refreshTokenDomain);
         }
 
         return builder;
