@@ -13,7 +13,8 @@ import org.springframework.stereotype.Component;
 import java.time.Duration;
 
 /**
- * Cookie 생성
+ * Cookie 생성 및 추출
+ * CSRF Token과 연관된 Header 추출 관리
  */
 @Component
 public class CookieProvider {
@@ -44,6 +45,7 @@ public class CookieProvider {
 
     private static final String REFRESH_TOKEN = "refreshToken";
     private static final String CSRF_TOKEN = "csrfToken";
+    private static final String CSRF_HEADER = "X-CSRF-TOKEN";
 
     private ResponseCookie.ResponseCookieBuilder refreshTokenCookieBuilder(
             String refreshToken, Duration maxAge
@@ -72,7 +74,7 @@ public class CookieProvider {
         ).build();
     }
 
-    public String extractRefreshToken(HttpServletRequest request) {
+    public String extractRefreshTokenCookie(HttpServletRequest request) {
         Cookie[] cookies = request.getCookies();
 
         if (cookies == null) {
@@ -118,6 +120,38 @@ public class CookieProvider {
         return csrfTokenCookieBuilder(
                 csrfTokenInfo.csrfToken(),
                 Duration.ofSeconds(csrfTokenInfo.ttlSeconds())
+        ).build();
+    }
+
+    public String extractCsrfTokenCookie(HttpServletRequest request) {
+        Cookie[] cookies = request.getCookies();
+
+        if (cookies == null) {
+            throw new BusinessException(ErrorCode.CSRF_TOKEN_NOT_FOUND);
+        }
+
+        for (Cookie cookie : cookies) {
+            if (CSRF_TOKEN.equals(cookie.getName())) {
+                return cookie.getValue();
+            }
+        }
+
+        throw new BusinessException(ErrorCode.CSRF_TOKEN_NOT_FOUND);
+    }
+
+    public String extractCsrfHeader(HttpServletRequest request) {
+        String csrfToken = request.getHeader(CSRF_HEADER);
+
+        if (csrfToken == null || csrfToken.isBlank()) {
+            throw new BusinessException(ErrorCode.CSRF_TOKEN_NOT_FOUND);
+        }
+
+        return csrfToken;
+    }
+
+    public ResponseCookie deleteCsrfTokenCookie() {
+        return csrfTokenCookieBuilder(
+                "", Duration.ZERO
         ).build();
     }
 }

@@ -5,7 +5,6 @@ import io.github.crewhub.dto.auth.request.LoginRequest;
 import io.github.crewhub.dto.auth.request.SignUpRequest;
 import io.github.crewhub.dto.auth.response.AuthResponse;
 import io.github.crewhub.dto.auth.response.AuthResult;
-import io.github.crewhub.dto.token.RefreshTokenInfo;
 import io.github.crewhub.entity.user.User;
 import io.github.crewhub.security.cookie.CookieProvider;
 import io.github.crewhub.security.jwt.JwtProvider;
@@ -74,10 +73,7 @@ public class AuthController {
             HttpServletRequest request,
             HttpServletResponse response
     ) {
-        String refreshToken = cookieProvider.extractRefreshToken(request);
-
-        AuthResult authResult = tokenService.refresh(refreshToken);
-
+        AuthResult authResult = tokenService.refresh(request);
         return responseWithToken(authResult, response);
     }
 
@@ -108,7 +104,6 @@ public class AuthController {
                 HttpHeaders.SET_COOKIE,
                 csrfTokenCookie.toString()
         );
-
     }
 
     @PostMapping("/logout")
@@ -120,11 +115,16 @@ public class AuthController {
 
         authService.logout(accessToken);
 
-        ResponseCookie cookie = cookieProvider.deleteRefreshTokenCookie();
+        ResponseCookie refreshTokenCookie = cookieProvider.deleteRefreshTokenCookie();
+        ResponseCookie csrfTokenCookie = cookieProvider.deleteCsrfTokenCookie();
 
         response.addHeader(
                 HttpHeaders.SET_COOKIE,
-                cookie.toString()
+                refreshTokenCookie.toString()
+        );
+        response.addHeader(
+                HttpHeaders.SET_COOKIE,
+                csrfTokenCookie.toString()
         );
 
         return ApiResponse.success("성공적으로 로그아웃했습니다.");

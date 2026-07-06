@@ -12,12 +12,14 @@ import io.github.crewhub.enums.common.ErrorCode;
 import io.github.crewhub.enums.token.RefreshTokenStatus;
 import io.github.crewhub.repository.token.AccessTokenBlacklistRepository;
 import io.github.crewhub.repository.token.RefreshTokenRepository;
+import io.github.crewhub.security.cookie.CookieProvider;
 import io.github.crewhub.security.csrf.CsrfTokenProvider;
 import io.github.crewhub.security.jwt.JwtProvider;
 import io.github.crewhub.service.user.UserService;
 import io.github.crewhub.utils.DateUtils;
 import io.github.crewhub.utils.TokenHashUtils;
 import io.jsonwebtoken.Claims;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
@@ -42,6 +44,7 @@ public class TokenService {
 
     private final JwtProvider jwtProvider;
     private final CsrfTokenProvider csrfTokenProvider;
+    private final CookieProvider cookieProvider;
 
     private final DateUtils dateUtils;
     private final TokenHashUtils tokenHashUtils;
@@ -146,7 +149,11 @@ public class TokenService {
     }
 
     @Transactional
-    public AuthResult refresh(String refreshToken) {
+    public AuthResult refresh(HttpServletRequest request) {
+        validateCsrfToken(request);
+
+        String refreshToken = cookieProvider.extractRefreshTokenCookie(request);
+
         Claims claims = jwtProvider.parseAndValidateRefreshToken(refreshToken);
 
         String jti = jwtProvider.extractJti(claims);
@@ -232,5 +239,14 @@ public class TokenService {
                 .build();
 
         blacklistRepository.save(blacklist);
+    }
+
+    public void validateCsrfToken(HttpServletRequest request) {
+        String cookieToken = cookieProvider.extractCsrfTokenCookie(request);
+        String headerToken = cookieProvider.extractCsrfHeader(request);
+
+        if (!headerToken.equals(cookieToken)) {
+            throw new BusinessException(ErrorCode.INVALID_CSRF_TOKEN);
+        }
     }
 }
