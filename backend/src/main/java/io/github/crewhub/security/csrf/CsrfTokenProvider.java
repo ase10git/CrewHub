@@ -1,5 +1,6 @@
 package io.github.crewhub.security.csrf;
 
+import io.github.crewhub.dto.token.CsrfTokenInfo;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -17,9 +18,19 @@ public class CsrfTokenProvider {
 
     private static final int TOKEN_BYTE_LENGTH = 32;
 
-    public static String generate() {
+    public String generate() {
         byte[] randomBytes = new byte[TOKEN_BYTE_LENGTH];
         secureRandom.nextBytes(randomBytes);
         return Base64.getUrlEncoder().withoutPadding().encodeToString(randomBytes);
+    }
+
+    public CsrfTokenInfo generate(Long ttlSeconds) {
+        byte[] randomBytes = new byte[TOKEN_BYTE_LENGTH];
+        secureRandom.nextBytes(randomBytes);
+        String token = Base64.getUrlEncoder().withoutPadding().encodeToString(randomBytes);
+        return CsrfTokenInfo.builder()
+                .csrfToken(token)
+                .ttlSeconds(ttlSeconds)
+                .build();
     }
 }
