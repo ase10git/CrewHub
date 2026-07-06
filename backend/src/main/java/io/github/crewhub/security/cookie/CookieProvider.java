@@ -1,6 +1,7 @@
 package io.github.crewhub.security.cookie;
 
 import io.github.crewhub.common.exception.BusinessException;
+import io.github.crewhub.dto.token.CsrfTokenInfo;
 import io.github.crewhub.dto.token.RefreshTokenInfo;
 import io.github.crewhub.enums.common.ErrorCode;
 import jakarta.servlet.http.Cookie;
@@ -42,7 +43,6 @@ public class CookieProvider {
     private String csrfTokenSameSite;
 
     private static final String REFRESH_TOKEN = "refreshToken";
-
     private static final String CSRF_TOKEN = "csrfToken";
 
     private ResponseCookie.ResponseCookieBuilder refreshTokenCookieBuilder(
@@ -91,6 +91,33 @@ public class CookieProvider {
     public ResponseCookie deleteRefreshTokenCookie() {
         return refreshTokenCookieBuilder(
                 "", Duration.ZERO
+        ).build();
+    }
+
+    private ResponseCookie.ResponseCookieBuilder csrfTokenCookieBuilder(
+            String csrfToken, Duration maxAge
+    ) {
+
+        ResponseCookie.ResponseCookieBuilder builder =
+                ResponseCookie.from(CSRF_TOKEN, csrfToken)
+                        .httpOnly(csrfTokenHttpOnly)
+                        .secure(csrfTokenSecure)
+                        .path("/api/auth/refresh")
+                        .domain("")
+                        .maxAge(maxAge)
+                        .sameSite(csrfTokenSameSite);
+
+        if (csrfTokenDomain != null && !csrfTokenDomain.isBlank()) {
+            builder.domain(csrfTokenDomain);
+        }
+
+        return builder;
+    }
+
+    public ResponseCookie createCsrfTokenCookie(CsrfTokenInfo csrfTokenInfo) {
+        return csrfTokenCookieBuilder(
+                csrfTokenInfo.csrfToken(),
+                Duration.ofSeconds(csrfTokenInfo.ttlSeconds())
         ).build();
     }
 }

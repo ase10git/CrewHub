@@ -18,12 +18,6 @@ public class CsrfTokenProvider {
 
     private static final int TOKEN_BYTE_LENGTH = 32;
 
-    public String generate() {
-        byte[] randomBytes = new byte[TOKEN_BYTE_LENGTH];
-        secureRandom.nextBytes(randomBytes);
-        return Base64.getUrlEncoder().withoutPadding().encodeToString(randomBytes);
-    }
-
     public CsrfTokenInfo generate(Long ttlSeconds) {
         byte[] randomBytes = new byte[TOKEN_BYTE_LENGTH];
         secureRandom.nextBytes(randomBytes);
