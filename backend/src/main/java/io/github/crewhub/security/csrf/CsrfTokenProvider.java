@@ -1,6 +1,8 @@
 package io.github.crewhub.security.csrf;
 
+import io.github.crewhub.common.exception.BusinessException;
 import io.github.crewhub.dto.token.CsrfTokenInfo;
+import io.github.crewhub.enums.common.ErrorCode;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -26,5 +28,11 @@ public class CsrfTokenProvider {
                 .csrfToken(token)
                 .ttlSeconds(ttlSeconds)
                 .build();
+    }
+
+    public void validateCsrfToken(String cookieToken, String headerToken) {
+        if (!headerToken.equals(cookieToken)) {
+            throw new BusinessException(ErrorCode.INVALID_CSRF_TOKEN);
+        }
     }
 }

@@ -245,8 +245,6 @@ public class TokenService {
         String cookieToken = cookieProvider.extractCsrfTokenCookie(request);
         String headerToken = cookieProvider.extractCsrfHeader(request);
 
-        if (!headerToken.equals(cookieToken)) {
-            throw new BusinessException(ErrorCode.INVALID_CSRF_TOKEN);
-        }
+        csrfTokenProvider.validateCsrfToken(cookieToken, headerToken);
     }
 }
