@@ -52,7 +52,6 @@ public class AuthController {
             HttpServletResponse response
             ) {
         User user = authService.login(loginRequest);
-
         return authenticate(user, response);
     }
 
@@ -92,21 +91,24 @@ public class AuthController {
     }
 
     private ApiResponse<AuthResponse> responseWithToken(AuthResult result, HttpServletResponse response) {
-        issueTokenCookie(
-                result.refreshTokenInfo(),
-                response
-        );
+        issueTokenCookie(result, response);
 
         return ApiResponse.success(result.authResponse());
     }
 
-    private void issueTokenCookie(RefreshTokenInfo refreshTokenInfo, HttpServletResponse response) {
-        ResponseCookie cookie = cookieProvider.createRefreshTokenCookie(refreshTokenInfo);
+    private void issueTokenCookie(AuthResult result, HttpServletResponse response) {
+        ResponseCookie refreshTokenCookie = cookieProvider.createRefreshTokenCookie(result.refreshTokenInfo());
+        ResponseCookie csrfTokenCookie = cookieProvider.createCsrfTokenCookie(result.csrfTokenInfo());
 
         response.addHeader(
                 HttpHeaders.SET_COOKIE,
-                cookie.toString()
+                refreshTokenCookie.toString()
         );
+        response.addHeader(
+                HttpHeaders.SET_COOKIE,
+                csrfTokenCookie.toString()
+        );
+
     }
 
     @PostMapping("/logout")
