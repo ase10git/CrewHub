@@ -3,6 +3,7 @@ package io.github.crewhub.service.auth;
 import io.github.crewhub.common.exception.BusinessException;
 import io.github.crewhub.dto.auth.response.AuthResponse;
 import io.github.crewhub.dto.auth.response.AuthResult;
+import io.github.crewhub.dto.token.CsrfTokenInfo;
 import io.github.crewhub.dto.token.RefreshTokenInfo;
 import io.github.crewhub.entity.auth.AccessTokenBlacklist;
 import io.github.crewhub.entity.auth.RefreshToken;
@@ -11,6 +12,7 @@ import io.github.crewhub.enums.common.ErrorCode;
 import io.github.crewhub.enums.token.RefreshTokenStatus;
 import io.github.crewhub.repository.token.AccessTokenBlacklistRepository;
 import io.github.crewhub.repository.token.RefreshTokenRepository;
+import io.github.crewhub.security.csrf.CsrfTokenProvider;
 import io.github.crewhub.security.jwt.JwtProvider;
 import io.github.crewhub.service.user.UserService;
 import io.github.crewhub.utils.DateUtils;
@@ -39,6 +41,7 @@ public class TokenService {
     private final UserService userService;
 
     private final JwtProvider jwtProvider;
+    private final CsrfTokenProvider csrfTokenProvider;
 
     private final DateUtils dateUtils;
     private final TokenHashUtils tokenHashUtils;
@@ -54,6 +57,8 @@ public class TokenService {
 
         saveRefreshToken(user.getId(), familyId, refreshTokenInfo);
 
+        CsrfTokenInfo csrfTokenInfo = csrfTokenProvider.generate(refreshTokenInfo.ttlSeconds());
+
         AuthResponse authResponse = AuthResponse.builder()
                 .userId(user.getId())
                 .username(user.getUsername())
@@ -63,6 +68,7 @@ public class TokenService {
         return AuthResult.builder()
                 .authResponse(authResponse)
                 .refreshTokenInfo(refreshTokenInfo)
+                .csrfTokenInfo(csrfTokenInfo)
                 .build();
     }
 
