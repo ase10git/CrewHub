@@ -45,6 +45,8 @@ public enum ErrorCode {
     GATHERING_MEMBER_ONLY(HttpStatus.FORBIDDEN, "모임 회원만 이용할 수 있습니다."),
     WRITER_ONLY(HttpStatus.FORBIDDEN, "작성자만 이용할 수 있습니다."),
 
+    TOO_MANY_LOGIN_ATTEMPTS(HttpStatus.TOO_MANY_REQUESTS, "로그인 시도 횟수가 너무 많습니다. 잠시 후 다시 시도해주세요."),
+
     INTERNAL_SERVER_ERROR(
             HttpStatus.INTERNAL_SERVER_ERROR,
             "서버 내부 오류가 발생했습니다."
