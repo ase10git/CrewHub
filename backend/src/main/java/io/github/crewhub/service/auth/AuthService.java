@@ -3,6 +3,7 @@ package io.github.crewhub.service.auth;
 import io.github.crewhub.common.exception.BusinessException;
 import io.github.crewhub.dto.auth.request.LoginRequest;
 import io.github.crewhub.dto.auth.request.SignUpRequest;
+import io.github.crewhub.entity.auth.LoginFailUser;
 import io.github.crewhub.entity.user.User;
 import io.github.crewhub.enums.common.ErrorCode;
 import io.github.crewhub.enums.user.UserStatus;
@@ -26,13 +27,26 @@ public class AuthService {
     private final PasswordEncoder passwordEncoder;
 
     private final TokenService tokenService;
+    private final LoginFailService loginFailService;
 
     public User login(LoginRequest request) {
-        User user = userRepository.findByEmail(request.email()).orElseThrow(
-                () -> new BusinessException(ErrorCode.INVALID_LOGIN)
-        );
+        String email = request.email();
 
-        validatePassword(request.password(), user.getPassword());
+        LoginFailUser loginFailUser = loginFailService.checkBlocked(email);
+
+        User user = userRepository.findByEmail(email).orElse(null);
+
+        if (user == null) {
+            loginFailService.fail(loginFailUser);
+            throw new BusinessException(ErrorCode.INVALID_LOGIN);
+        }
+
+        validatePassword(
+                email,
+                request.password(),
+                user.getPassword(),
+                loginFailUser
+        );
 
         return user;
     }
@@ -62,10 +76,17 @@ public class AuthService {
         }
     }
 
-    private void validatePassword(String rawPassword, String encodedPassword) {
+    private void validatePassword(
+            String email,
+            String rawPassword,
+            String encodedPassword,
+            LoginFailUser loginFailUser
+    ) {
         if (!passwordEncoder.matches(rawPassword, encodedPassword)) {
+            loginFailService.fail(loginFailUser);
             throw new BusinessException(ErrorCode.INVALID_LOGIN);
         }
+        loginFailService.clear(email);
     }
 
     @Transactional
