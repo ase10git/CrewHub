@@ -1,4 +1,4 @@
-package io.github.crewhub.entity.auth;
+package io.github.crewhub.entity.token;
 
 import lombok.*;
 import org.springframework.data.annotation.Id;

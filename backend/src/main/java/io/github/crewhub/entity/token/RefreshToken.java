@@ -1,4 +1,4 @@
-package io.github.crewhub.entity.auth;
+package io.github.crewhub.entity.token;
 
 import io.github.crewhub.enums.token.RefreshTokenStatus;
 import lombok.*;

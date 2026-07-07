@@ -1,6 +1,6 @@
 package io.github.crewhub.repository.token;
 
-import io.github.crewhub.entity.auth.RefreshToken;
+import io.github.crewhub.entity.token.RefreshToken;
 import org.springframework.data.repository.ListCrudRepository;
 import org.springframework.stereotype.Repository;
 

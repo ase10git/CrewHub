@@ -1,6 +1,6 @@
 package io.github.crewhub.repository.token;
 
-import io.github.crewhub.entity.auth.AccessTokenBlacklist;
+import io.github.crewhub.entity.token.AccessTokenBlacklist;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;
 
