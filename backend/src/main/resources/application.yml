@@ -35,6 +35,11 @@ cookie:
     same-site: ${CSRF_TOKEN_COOKIE_SAME_SITE}
     domain: ${CSRF_TOKEN_COOKIE_DOMAIN}
 
+security:
+  login-fail:
+    max-count: ${LOGIN_FAIL_MAX_COUNT}
+    ttl-seconds: ${LOGIN_FAIL_TTL_SECONDS}
+
 springdoc:
   api-docs:
     path: /api-docs
