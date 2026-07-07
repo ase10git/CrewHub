@@ -48,9 +48,10 @@ public class AuthController {
     @PostMapping("/login")
     public ApiResponse<AuthResponse> login(
             @Valid @RequestBody LoginRequest loginRequest,
+            HttpServletRequest request,
             HttpServletResponse response
             ) {
-        User user = authService.login(loginRequest);
+        User user = authService.login(loginRequest, request);
         return authenticate(user, response);
     }
 

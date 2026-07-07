@@ -9,6 +9,7 @@ import io.github.crewhub.enums.common.ErrorCode;
 import io.github.crewhub.enums.user.UserStatus;
 import io.github.crewhub.repository.user.UserRepository;
 import io.github.crewhub.service.token.TokenService;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -28,9 +29,12 @@ public class AuthService {
 
     private final TokenService tokenService;
     private final LoginFailService loginFailService;
+    private final LoginAttemptService loginAttemptService;
 
-    public User login(LoginRequest request) {
-        String email = request.email();
+    public User login(LoginRequest loginRequest, HttpServletRequest request) {
+        loginAttemptService.recordLoginAttempt(request);
+
+        String email = loginRequest.email();
 
         LoginFailUser loginFailUser = loginFailService.checkBlocked(email);
 
@@ -43,7 +47,7 @@ public class AuthService {
 
         validatePassword(
                 email,
-                request.password(),
+                loginRequest.password(),
                 user.getPassword(),
                 loginFailUser
         );
