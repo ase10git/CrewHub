@@ -39,6 +39,9 @@ security:
   login-fail:
     max-count: ${LOGIN_FAIL_MAX_COUNT}
     ttl-seconds: ${LOGIN_FAIL_TTL_SECONDS}
+  login-ip:
+    max-count: ${LOGIN_IP_MAX_COUNT}
+    ttl-seconds: ${LOGIN_IP_TTL_SECONDS}
 
 springdoc:
   api-docs:
