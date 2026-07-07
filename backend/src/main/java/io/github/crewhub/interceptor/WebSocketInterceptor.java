@@ -4,7 +4,7 @@ import io.github.crewhub.common.exception.BusinessException;
 import io.github.crewhub.enums.common.ErrorCode;
 import io.github.crewhub.security.details.CustomUserDetailsService;
 import io.github.crewhub.security.jwt.JwtProvider;
-import io.github.crewhub.service.auth.TokenService;
+import io.github.crewhub.service.token.TokenService;
 import io.jsonwebtoken.Claims;
 import lombok.RequiredArgsConstructor;
 import org.springframework.messaging.Message;

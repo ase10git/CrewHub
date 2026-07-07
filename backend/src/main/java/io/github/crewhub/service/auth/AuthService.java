@@ -7,6 +7,7 @@ import io.github.crewhub.entity.user.User;
 import io.github.crewhub.enums.common.ErrorCode;
 import io.github.crewhub.enums.user.UserStatus;
 import io.github.crewhub.repository.user.UserRepository;
+import io.github.crewhub.service.token.TokenService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;

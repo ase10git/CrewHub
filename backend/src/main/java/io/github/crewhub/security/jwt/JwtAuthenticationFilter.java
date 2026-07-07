@@ -2,7 +2,7 @@ package io.github.crewhub.security.jwt;
 
 import io.github.crewhub.common.exception.BusinessException;
 import io.github.crewhub.security.details.CustomUserDetailsService;
-import io.github.crewhub.service.auth.TokenService;
+import io.github.crewhub.service.token.TokenService;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
 import jakarta.servlet.FilterChain;

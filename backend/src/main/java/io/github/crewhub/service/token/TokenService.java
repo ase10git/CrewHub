@@ -1,4 +1,4 @@
-package io.github.crewhub.service.auth;
+package io.github.crewhub.service.token;
 
 import io.github.crewhub.common.exception.BusinessException;
 import io.github.crewhub.dto.auth.response.AuthResponse;

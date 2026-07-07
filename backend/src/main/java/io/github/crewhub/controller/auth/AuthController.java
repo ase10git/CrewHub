@@ -9,7 +9,7 @@ import io.github.crewhub.entity.user.User;
 import io.github.crewhub.security.cookie.CookieProvider;
 import io.github.crewhub.security.jwt.JwtProvider;
 import io.github.crewhub.service.auth.AuthService;
-import io.github.crewhub.service.auth.TokenService;
+import io.github.crewhub.service.token.TokenService;
 import io.github.crewhub.swagger.annotation.auth.AuthLoginApi;
 import io.github.crewhub.swagger.annotation.auth.AuthRefreshApi;
 import io.github.crewhub.swagger.annotation.auth.AuthRegisterApi;
