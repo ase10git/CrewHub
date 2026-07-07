@@ -1,4 +1,4 @@
-package io.github.crewhub.config;
+package io.github.crewhub.config.auth;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 

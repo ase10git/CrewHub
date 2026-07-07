@@ -1,7 +1,7 @@
 package io.github.crewhub.service.auth;
 
 import io.github.crewhub.common.exception.BusinessException;
-import io.github.crewhub.config.LoginFailProperties;
+import io.github.crewhub.config.auth.LoginFailProperties;
 import io.github.crewhub.entity.auth.LoginFailUser;
 import io.github.crewhub.enums.common.ErrorCode;
 import io.github.crewhub.repository.auth.LoginFailUserRepository;
