@@ -34,7 +34,7 @@ public class AuthService {
     public User login(LoginRequest loginRequest, HttpServletRequest request) {
         loginAttemptService.recordLoginAttempt(request);
 
-        String email = loginRequest.email();
+        String email = trim(loginRequest.email());
 
         LoginFailUser loginFailUser = loginFailService.checkBlocked(email);
 
@@ -59,9 +59,12 @@ public class AuthService {
     public User signup(SignUpRequest request) {
         validateDuplicateUser(request);
 
+        String email = trim(request.email());
+        String username = trim(request.username());
+
         User user = User.builder()
-                .username(request.username())
-                .email(request.email())
+                .username(username)
+                .email(email)
                 .password(passwordEncoder.encode(
                         request.password()
                 ))
@@ -69,6 +72,10 @@ public class AuthService {
                 .build();
 
         return userRepository.save(user);
+    }
+
+    private String trim(String value) {
+        return value == null ? null : value.trim();
     }
 
     private void validateDuplicateUser(SignUpRequest request) {
