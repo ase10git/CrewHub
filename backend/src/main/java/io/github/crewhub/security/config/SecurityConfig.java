@@ -14,6 +14,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.web.header.writers.ReferrerPolicyHeaderWriter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
@@ -50,6 +51,22 @@ public class SecurityConfig {
                         session.sessionCreationPolicy(
                                 SessionCreationPolicy.STATELESS
                         )
+                )
+                .headers(
+                        headers -> headers
+                                .contentSecurityPolicy(csp ->
+                                        csp.policyDirectives("default-src 'none'; frame-ancestors 'none'; base-uri 'none'; form-action 'none';"))
+                                .httpStrictTransportSecurity(hsts ->
+                                        hsts.includeSubDomains(true)
+                                        .preload(false)
+                                        .maxAgeInSeconds(31536000)
+                                )
+                                .referrerPolicy(referrer ->
+                                        referrer.policy(
+                                                ReferrerPolicyHeaderWriter.ReferrerPolicy.STRICT_ORIGIN_WHEN_CROSS_ORIGIN
+                                        ))
+                                .permissionsPolicyHeader(policy ->
+                                        policy.policy("camera=(), microphone=(), geolocation=(), payment=(), usb=(), fullscreen=(self)"))
                 )
                 .authorizeHttpRequests(auth -> auth
 
