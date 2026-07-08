@@ -21,6 +21,10 @@ public record SignUpRequest (
         )
         @Email @NotBlank
         @Size(max = 100)
+        @Pattern(
+                regexp = AuthValidationRegex.ENGLISH_EMAIL,
+                message = "올바른 이메일 형식이 아닙니다."
+        )
         String email,
 
         @Schema(

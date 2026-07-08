@@ -6,6 +6,9 @@ package io.github.crewhub.config.auth;
 public final class AuthValidationRegex {
     private AuthValidationRegex() {}
 
+    // 영문 이메일 형식
+    public static final String ENGLISH_EMAIL = "^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$";
+
     // 한글, 영어, 숫자
     public static final String USERNAME = "^[가-힣A-Za-z][가-힣A-Za-z0-9_]{2,19}$";
     
