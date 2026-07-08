@@ -1,4 +1,4 @@
-package io.github.crewhub.config;
+package io.github.crewhub.config.redis;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
