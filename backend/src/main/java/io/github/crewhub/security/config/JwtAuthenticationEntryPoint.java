@@ -13,7 +13,7 @@ import org.springframework.stereotype.Component;
 import java.io.IOException;
 
 /**
- * Jwt인증 진입 설정 및 예외 처리
+ * JWT 인증 진입 설정 및 예외 처리
  */
 @Component
 @RequiredArgsConstructor
@@ -27,7 +27,7 @@ public class JwtAuthenticationEntryPoint implements AuthenticationEntryPoint {
             AuthenticationException authException
     ) throws IOException {
 
-        ErrorCode errorCode = ErrorCode.INVALID_TOKEN;
+        ErrorCode errorCode = ErrorCode.INVALID_ACCESS_TOKEN;
 
         response.setStatus(errorCode.getStatus().value());
         response.setContentType("application/json;charset=UTF-8");

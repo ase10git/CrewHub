@@ -1,6 +1,9 @@
 package io.github.crewhub.security.jwt;
 
+import io.github.crewhub.common.exception.BusinessException;
 import io.github.crewhub.security.details.CustomUserDetailsService;
+import io.github.crewhub.service.token.TokenService;
+import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -17,11 +20,15 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
 
+/**
+ * JWT 검증하는 Security Filter
+ */
 @Component
 @RequiredArgsConstructor
 public class JwtAuthenticationFilter  extends OncePerRequestFilter {
     private final JwtProvider jwtProvider;
     private final CustomUserDetailsService userDetailsService;
+    private final TokenService tokenService;
 
     @Override
     protected boolean shouldNotFilter(
@@ -43,14 +50,16 @@ public class JwtAuthenticationFilter  extends OncePerRequestFilter {
     ) throws ServletException, IOException {
         final String authHeader = request.getHeader("Authorization");
 
-        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-            filterChain.doFilter(request, response);
-            return;
-        }
-
         try {
-            String jwt = authHeader.substring(7);
-            String userId = jwtProvider.extractUserId(jwt);
+            String accessToken = jwtProvider.extractBearerToken(authHeader);
+
+            Claims claims = jwtProvider.parseAndValidateAccessToken(accessToken);
+
+            tokenService.checkAccessTokenBlacklist(
+                    jwtProvider.extractJti(claims)
+            );
+
+            String userId = jwtProvider.extractUserId(claims);
 
             if (userId != null
                     && SecurityContextHolder
@@ -58,32 +67,31 @@ public class JwtAuthenticationFilter  extends OncePerRequestFilter {
                     .getAuthentication() == null) {
 
                 UserDetails userDetails
-                        = this
-                        .userDetailsService
+                        = userDetailsService
                         .loadUserByUsername(userId);
 
-                if (jwtProvider.isTokenValid(jwt, userDetails)) {
-                    UsernamePasswordAuthenticationToken authToken
-                            = new UsernamePasswordAuthenticationToken(
-                            userDetails,
-                            null,
-                            userDetails.getAuthorities()
-                    );
+                jwtProvider.validateTokenUser(userId, userDetails);
+                
+                UsernamePasswordAuthenticationToken authToken
+                        = new UsernamePasswordAuthenticationToken(
+                        userDetails,
+                        null,
+                        userDetails.getAuthorities()
+                );
 
-                    authToken.setDetails(
-                            new WebAuthenticationDetailsSource()
-                                    .buildDetails(request)
-                    );
+                authToken.setDetails(
+                        new WebAuthenticationDetailsSource()
+                                .buildDetails(request)
+                );
 
-                    SecurityContext context =
-                            SecurityContextHolder.createEmptyContext();
+                SecurityContext context =
+                        SecurityContextHolder.createEmptyContext();
 
-                    context.setAuthentication(authToken);
+                context.setAuthentication(authToken);
 
-                    SecurityContextHolder.setContext(context);
-                }
+                SecurityContextHolder.setContext(context);
             }
-        } catch (JwtException e) {
+        } catch (JwtException | BusinessException e) {
             SecurityContextHolder.clearContext();
         }
         filterChain.doFilter(request, response);

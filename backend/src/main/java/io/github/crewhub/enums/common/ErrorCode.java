@@ -9,7 +9,13 @@ import org.springframework.http.HttpStatus;
 @Getter
 public enum ErrorCode {
     INVALID_LOGIN(HttpStatus.UNAUTHORIZED, "이메일 또는 비밀번호가 올바르지 않습니다."),
-    INVALID_TOKEN(HttpStatus.UNAUTHORIZED, "유효하지 않은 토큰입니다."),
+    INVALID_ACCESS_TOKEN(HttpStatus.UNAUTHORIZED, "유효하지 않은 Access 토큰입니다."),
+    INVALID_REFRESH_TOKEN(HttpStatus.UNAUTHORIZED, "유효하지 않은 Refresh 토큰입니다."),
+    INVALID_CSRF_TOKEN(HttpStatus.UNAUTHORIZED, "유효하지 않은 Csrf 토큰입니다."),
+    EXPIRED_ACCESS_TOKEN(HttpStatus.UNAUTHORIZED, "만료된 Access 토큰입니다."),
+    EXPIRED_REFRESH_TOKEN(HttpStatus.UNAUTHORIZED, "만료된 Refresh 토큰입니다."),
+    REFRESH_TOKEN_NOT_FOUND(HttpStatus.UNAUTHORIZED, "Refresh 토큰을 찾을 수 없습니다."),
+    CSRF_TOKEN_NOT_FOUND(HttpStatus.UNAUTHORIZED, "Csrf 토큰을 찾을 수 없습니다."),
 
     USER_NOT_FOUND(HttpStatus.NOT_FOUND, "사용자를 찾을 수 없습니다."),
     DOCUMENT_NOT_FOUND(HttpStatus.NOT_FOUND, "문서를 찾을 수 없습니다."),
@@ -38,6 +44,8 @@ public enum ErrorCode {
     MANAGER_CANNOT_LEAVE(HttpStatus.FORBIDDEN, "모임 관리자는 탈퇴할 수 없습니다. 먼저 관리자 권한을 위임하세요."),
     GATHERING_MEMBER_ONLY(HttpStatus.FORBIDDEN, "모임 회원만 이용할 수 있습니다."),
     WRITER_ONLY(HttpStatus.FORBIDDEN, "작성자만 이용할 수 있습니다."),
+
+    TOO_MANY_LOGIN_ATTEMPTS(HttpStatus.TOO_MANY_REQUESTS, "로그인 시도 횟수가 너무 많습니다. 잠시 후 다시 시도해주세요."),
 
     INTERNAL_SERVER_ERROR(
             HttpStatus.INTERNAL_SERVER_ERROR,

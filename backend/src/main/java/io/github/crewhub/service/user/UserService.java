@@ -19,6 +19,13 @@ import org.springframework.transaction.annotation.Transactional;
 public class UserService {
     private final UserRepository userRepository;
 
+    public User getUser(Integer userId) {
+        return userRepository.findById(userId)
+                .orElseThrow(
+                        () -> new BusinessException(ErrorCode.USER_NOT_FOUND)
+                );
+    }
+
     public UserProfileResponse getUserProfile(Integer userId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(

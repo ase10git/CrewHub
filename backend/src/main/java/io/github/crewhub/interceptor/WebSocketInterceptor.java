@@ -4,6 +4,8 @@ import io.github.crewhub.common.exception.BusinessException;
 import io.github.crewhub.enums.common.ErrorCode;
 import io.github.crewhub.security.details.CustomUserDetailsService;
 import io.github.crewhub.security.jwt.JwtProvider;
+import io.github.crewhub.service.token.TokenService;
+import io.jsonwebtoken.Claims;
 import lombok.RequiredArgsConstructor;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
@@ -24,6 +26,7 @@ import org.springframework.stereotype.Component;
 public class WebSocketInterceptor implements ChannelInterceptor {
     private final JwtProvider jwtProvider;
     private final CustomUserDetailsService userDetailsService;
+    private final TokenService tokenService;
 
     @Override
     public Message<?> preSend(
@@ -43,18 +46,22 @@ public class WebSocketInterceptor implements ChannelInterceptor {
             String bearerToken = accessor.getFirstNativeHeader("Authorization");
 
             if (bearerToken == null || !bearerToken.startsWith("Bearer ")) {
-                throw new BusinessException(ErrorCode.INVALID_TOKEN);
+                throw new BusinessException(ErrorCode.INVALID_ACCESS_TOKEN);
             }
 
-            String token = bearerToken.substring(7);
+            String token = jwtProvider.extractBearerToken(bearerToken);
 
-            if (!jwtProvider.isTokenValid(token)) {
-                throw new BusinessException(ErrorCode.INVALID_TOKEN);
-            }
+            Claims claims = jwtProvider.parseAndValidateAccessToken(token);
 
-            Integer userId = Integer.valueOf(jwtProvider.extractUserId(token));
+            tokenService.checkAccessTokenBlacklist(
+                    jwtProvider.extractJti(claims)
+            );
 
-            UserDetails userDetails = userDetailsService.loadByUserId(userId);
+            String userId = jwtProvider.extractUserId(claims);
+
+            UserDetails userDetails = userDetailsService.loadUserByUsername(userId);
+
+            jwtProvider.validateTokenUser(userId, userDetails);
 
             Authentication authentication = new UsernamePasswordAuthenticationToken(
                     userDetails,

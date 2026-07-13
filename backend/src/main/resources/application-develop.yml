@@ -8,6 +8,12 @@ spring:
     password: ${DATABASE_PASSWORD}
     hikari:
       maximum-pool-size: ${DB_POOL_SIZE:10}
+  data:
+    redis:
+      database: ${REDIS_DATABASE}
+      host: ${REDIS_LOCAL_HOST}
+      port: ${REDIS_PORT}
+      timeout: ${REDIS_TIMEOUT}
   jpa:
     hibernate:
       ddl-auto: update

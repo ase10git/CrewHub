@@ -1,4 +1,4 @@
-package io.github.crewhub.config;
+package io.github.crewhub.config.websocket;
 
 import io.github.crewhub.interceptor.WebSocketInterceptor;
 import lombok.RequiredArgsConstructor;
