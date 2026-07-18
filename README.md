@@ -163,11 +163,7 @@ Spring Boot REST API (Render)
 ## 📡 API 문서
 
 Swagger UI
-
-```text
-https://crewhub-24pa.onrender.com/swagger-ui/index.html
-```
-
+- 서버 배포 중단
 ---
 
 ## 📌 MVP 범위
