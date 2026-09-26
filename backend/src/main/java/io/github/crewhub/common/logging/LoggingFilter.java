@@ -9,6 +9,7 @@ import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
@@ -17,6 +18,7 @@ import java.util.UUID;
 /**
  * HTTP 요청과 응답을 기록하는 공통 로깅 필터
  */
+@Component
 public class LoggingFilter extends OncePerRequestFilter {
     private static final Logger log = LoggerFactory.getLogger(LoggingFilter.class);
     private static final String REQUEST_ID = "requestId";
