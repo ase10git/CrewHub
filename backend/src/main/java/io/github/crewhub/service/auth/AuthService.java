@@ -12,17 +12,18 @@ import io.github.crewhub.repository.user.UserRepository;
 import io.github.crewhub.security.details.CustomUserDetails;
 import io.github.crewhub.security.jwt.JwtProvider;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-/**
- * 인증 인가 서비스
- */
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
 public class AuthService {
+    private static final Logger log = LoggerFactory.getLogger(AuthService.class);
+
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtProvider jwtProvider;
@@ -35,6 +36,8 @@ public class AuthService {
         validatePassword(request.password(), user.getPassword());
 
         String accessToken = jwtProvider.generateToken(new CustomUserDetails(user));
+
+        log.info("User login succeeded: userId={}", user.getId());
 
         return LoginResponse.builder()
                 .userId(user.getId())
@@ -50,15 +53,15 @@ public class AuthService {
         User user = User.builder()
                 .username(request.username())
                 .email(request.email())
-                .password(passwordEncoder.encode(
-                        request.password()
-                ))
+                .password(passwordEncoder.encode(request.password()))
                 .status(UserStatus.ACTIVE)
                 .build();
 
         User savedUser = userRepository.save(user);
 
         String accessToken = jwtProvider.generateToken(new CustomUserDetails(savedUser));
+
+        log.info("User signup succeeded: userId={}", savedUser.getId());
 
         return SignUpResponse.builder()
                 .userId(savedUser.getId())
