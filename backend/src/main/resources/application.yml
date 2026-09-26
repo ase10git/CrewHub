@@ -12,8 +12,21 @@ app:
   version: ${APP_VERSION:0.0.0}
 
 logging:
+  file:
+    name: ${LOG_FILE:logs/crewhub.log}
   level:
     root: ${LOG_LEVEL:INFO}
+    io.github.crewhub: ${APP_LOG_LEVEL:INFO}
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level [%X{requestId:-}] %logger{36} - %msg%n"
+    file: "%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level [%X{requestId:-}] %logger{36} - %msg%n"
+  logback:
+    rollingpolicy:
+      file-name-pattern: ${LOG_FILE:logs/crewhub.log}.%d{yyyy-MM-dd}.%i.gz
+      max-file-size: ${LOG_MAX_FILE_SIZE:10MB}
+      max-history: ${LOG_MAX_HISTORY:30}
+      total-size-cap: ${LOG_TOTAL_SIZE_CAP:1GB}
+      clean-history-on-start: false
 
 jwt:
   secret-key: ${JWT_SECRET}
@@ -22,7 +35,6 @@ jwt:
 springdoc:
   api-docs:
     path: /api-docs
-
 
 cors:
   allowed-origins: ${CORS_ALLOWED_ORIGINS:http://localhost:5173}
