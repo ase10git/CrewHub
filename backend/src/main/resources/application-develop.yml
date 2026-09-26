@@ -1,5 +1,5 @@
 server:
-  port: ${SEVER_PORT:8080}
+  port: ${SERVER_PORT:8080}
 
 spring:
   datasource:
@@ -19,8 +19,9 @@ spring:
 
 logging:
   level:
-    root: ${LOG_LEVEL}
-    io.github.sunday: ${APP_LOG_LEVEL_DEV}
+    root: ${LOG_LEVEL:INFO}
+    io.github.crewhub: ${APP_LOG_LEVEL:DEBUG}
     org.springframework:
-      security: ${APP_LOG_LEVEL_DEV}
-      securityoauth2: ${APP_LOG_LEVEL_DEV}
+      security: ${APP_LOG_LEVEL_DEV:INFO}
+      securityoauth2: ${APP_LOG_LEVEL_DEV:INFO}
+    org.hibernate.SQL: ${HIBERNATE_LOG_LEVEL:DEBUG}
