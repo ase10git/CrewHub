@@ -1,8 +1,9 @@
 package io.github.crewhub.common.exception;
 
-
 import io.github.crewhub.common.response.ErrorResponse;
 import io.github.crewhub.enums.common.ErrorCode;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -15,12 +16,19 @@ import java.util.Objects;
  */
 @RestControllerAdvice
 public class GlobalExceptionHandler {
+    private static final Logger log = LoggerFactory.getLogger(GlobalExceptionHandler.class);
+
     @ExceptionHandler(BusinessException.class)
     public ResponseEntity<ErrorResponse> handleBusinessException(
             BusinessException e
     ) {
-
         ErrorCode errorCode = e.getErrorCode();
+
+        log.warn(
+                "Business exception: code={}, message={}",
+                errorCode.name(),
+                errorCode.getMessage()
+        );
 
         return ResponseEntity
                 .status(errorCode.getStatus())
@@ -37,6 +45,7 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ErrorResponse> handleException(
             Exception e
     ) {
+        log.error("Unhandled exception", e);
 
         return ResponseEntity
                 .internalServerError()
@@ -56,6 +65,8 @@ public class GlobalExceptionHandler {
         String message = Objects.requireNonNull(e.getBindingResult()
                         .getFieldError())
                 .getDefaultMessage();
+
+        log.warn("Validation exception: message={}", message);
 
         return ResponseEntity.badRequest()
                 .body(
