@@ -36,6 +36,7 @@ import java.util.List;
 public class GatheringService {
     private final GatheringRepository gatheringRepository;
     private final GatheringCategoryRepository categoryRepository;
+    private final GatheringCategoryCacheService categoryCacheService;
     private final GatheringMemberRepository memberRepository;
     private final UserRepository userRepository;
     private final ChatRoomRepository chatRoomRepository;
@@ -123,15 +124,7 @@ public class GatheringService {
     }
 
     public List<GatheringCategoryResponse> getCategories() {
-        return categoryRepository.findAll()
-                .stream()
-                .map(category -> GatheringCategoryResponse.builder()
-                        .categoryId(category.getId())
-                        .key(category.getKey())
-                        .label(category.getLabel())
-                        .build()
-                )
-                .toList();
+        return categoryCacheService.getCategories();
     }
 
     private GatheringSummaryResponse toSummaryResponse(Gathering gathering) {
